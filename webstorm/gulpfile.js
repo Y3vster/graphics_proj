@@ -94,6 +94,7 @@ gulp.task('copy:jquery', function () {
                .pipe(gulp.dest(dirs.dist + '/js/vendor'));
 });
 
+
 gulp.task('copy:license', function () {
     return gulp.src('LICENSE.txt')
                .pipe(gulp.dest(dirs.dist));
