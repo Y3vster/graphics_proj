@@ -3,11 +3,6 @@
 #define DC_GRID_STR 0.1
 #define DC_MAG_STR 0.2
 #define DC_LINE_PWR 5.0
-//#define GRID_SPACING vec2(0.5)
-//#define DC_SATUR 0.9
-//#define DC_GRID_STR 0.7
-//#define DC_MAG_STR 0.05
-//#define DC_LINE_PWR 10.0
 
 #ifdef GL_ES
 precision mediump float;
@@ -20,6 +15,11 @@ precision mediump float;
 uniform float time;
 uniform vec2 mouse;
 uniform vec2 resolution;
+
+int terms = 2;
+float n[10];
+float m[10];
+vec2 posn;
 
 vec3 hsv2rgb(vec3 c) {
   vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
@@ -62,12 +62,12 @@ vec4 domainColoring (vec2 z, vec2 gridSpacing, float saturation, float gridStren
 }
 
 
-float xhex3(float x, float y){
-    return 2.0 * M_PI * x + 2.0 * M_PI * y / M_SQRT3;
+float xhex(){
+    return 2.0 * M_PI * posn.x + 2.0 * M_PI * posn.y / M_SQRT3;
 }
 
-float yhex3(float y){
-    return 4.0 * M_PI * y / M_SQRT3;
+float yhex(){
+    return 4.0 * M_PI * posn.y / M_SQRT3;
 }
 
 vec2 unit_complex_fm_angle(float a){
@@ -78,39 +78,42 @@ vec2 polar_to_complex(vec2 polar){
     return unit_complex_fm_angle(polar.x) * polar.y;
 }
 
-/* posn: x, y coord, returns a complex */
-vec2 bundle_p31m(vec2 posn, float n, float m){
-    float xhex = xhex3(posn.x, posn.y);
-    float yhex = yhex3(posn.y);
-    vec2 p1 =   unit_complex_fm_angle(n * xhex + m * yhex) +
-                unit_complex_fm_angle(m * xhex + n * yhex);
-    vec2 p2 =   unit_complex_fm_angle(m * xhex - (n + m) * yhex) +
-                unit_complex_fm_angle(-(n + m) * xhex + m * yhex);
-    vec2 p3 =   unit_complex_fm_angle(-(n + m) * xhex + n * yhex) +
-                unit_complex_fm_angle(n * xhex - (n + m) * yhex);
-    return (p1 + p2 + p3) / 6.0;
+
+vec2 p31m_fn() {
+    vec2 ans = vec2(0, 0);
+    for (int k = 0; k < 10; k++) {
+	    if (k == terms) break;	// workaround to loops being limited to constant expressions
+        vec2 p1 =   unit_complex_fm_angle(n[k] * xhex() + m[k] * yhex()) +
+                    unit_complex_fm_angle(m[k] * xhex() + n[k] * yhex());
+        vec2 p2 =   unit_complex_fm_angle(m[k] * xhex() - (n[k] + m[k]) * yhex()) +
+                    unit_complex_fm_angle(-(n[k] + m[k]) * xhex() + m[k] * yhex());
+        vec2 p3 =   unit_complex_fm_angle(-(n[k] + m[k]) * xhex() + n[k] * yhex()) +
+                    unit_complex_fm_angle(n[k] * xhex() - (n[k] + m[k]) * yhex());
+	    vec2 thisterm = (p1 + p2 + p3) / 6.0;
+        ans.x += thisterm.x;
+        ans.y += thisterm.y;
+    }
+    return ans;
 }
 
 
 void main () {
+	posn = gl_FragCoord.xy / resolution.xy;
+	posn = posn * 2.0 - 1.0;
+	posn.x *= resolution.x / resolution.y;
 
-    vec2 uv = gl_FragCoord.xy / resolution.xy;
-    uv = uv * 2.0 - 1.0;
-    uv.x *= resolution.x / resolution.y;
+	n[0] = 2.0;
+	m[0] = 1.0;
+	n[1] = 2.0;
+	m[1] = 2.0;
 
-    //vec2 mn = resolution - mouse;
-    //mn.x = mn.x / resolution.x;
-    //mn.y = mn.y / resolution.y;
-    //mn = mn * 5.0 - 2.5;
-
-    //float m = 5.0 * (mouse.x - 0.5);
-    //float n = 5.0 * (mouse.y - 0.5);
-
-    float m = 1.0;
-    float n = 0.0;
+	for (int i = 2; i < 10; i++) {
+		n[i] = 0.0;
+		m[i] = 0.0;
+	}
 
     /* complex */
-    vec2 z = bundle_p31m(uv, n, m);
+    vec2 z = p31m_fn();
 
     gl_FragColor = domainColoring(z, GRID_SPACING, DC_SATUR, DC_GRID_STR, DC_MAG_STR, DC_LINE_PWR);
 }
