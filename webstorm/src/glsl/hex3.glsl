@@ -3,11 +3,11 @@
 //#define DC_GRID_STR 0.1
 //#define DC_MAG_STR 0.2
 //#define DC_LINE_PWR 5.0
-#define GRID_SPACING vec2(1.0)
-#define DC_SATUR 0.8
-#define DC_GRID_STR 0.5
-#define DC_MAG_STR 0.8
-#define DC_LINE_PWR 30.0
+#define GRID_SPACING vec2(0.5)
+#define DC_SATUR 0.9
+#define DC_GRID_STR 0.7
+#define DC_MAG_STR 0.05
+#define DC_LINE_PWR 10.0
 
 #ifdef GL_ES
 precision mediump float;
@@ -17,9 +17,7 @@ precision mediump float;
 #define M_PI 3.1415926535897932384626433832795
 #define M_SQRT3 1.732050807568877
 
-uniform float time;
-uniform vec2 mouse;
-uniform vec2 resolution;
+uniform vec2 mn;
 
 vec3 hsv2rgb(vec3 c) {
   vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
@@ -100,14 +98,13 @@ void main () {
 	//mn.y = mn.y / resolution.y;
 	//mn = mn * 5.0 - 2.5;
 
-    float m = 3.0 * (mouse.x - 0.5);
-    float n = 3.0 * (mouse.y - 0.5);
+    float m = 5.0 * (mouse.x - 0.5);
+    float n = 5.0 * (mouse.y - 0.5);
 
     /* complex */
     vec2 z = bundle_hex3(uv, n, m);
 
     gl_FragColor = domainColoring(z, GRID_SPACING, DC_SATUR, DC_GRID_STR, DC_MAG_STR, DC_LINE_PWR);
 }
-
 
 

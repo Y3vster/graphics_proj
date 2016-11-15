@@ -1,13 +1,8 @@
-//#define GRID_SPACING vec2(1.0)
-//#define DC_SATUR 0.7
-//#define DC_GRID_STR 0.1
-//#define DC_MAG_STR 0.2
-//#define DC_LINE_PWR 5.0
 #define GRID_SPACING vec2(1.0)
-#define DC_SATUR 0.8
-#define DC_GRID_STR 0.5
-#define DC_MAG_STR 0.8
-#define DC_LINE_PWR 30.0
+#define DC_SATUR 0.7
+#define DC_GRID_STR 0.1
+#define DC_MAG_STR 0.2
+#define DC_LINE_PWR 5.0
 
 #ifdef GL_ES
 precision mediump float;
@@ -62,11 +57,11 @@ vec4 domainColoring (vec2 z, vec2 gridSpacing, float saturation, float gridStren
 }
 
 
-float xhex3(float x, float y){
+float x_gen(float x, float y){
     return 2.0 * M_PI * x + 2.0 * M_PI * y / M_SQRT3;
 }
 
-float yhex3(float y){
+float y_gen(float y){
     return 4.0 * M_PI * y / M_SQRT3;
 }
 
@@ -79,15 +74,16 @@ vec2 polar_to_complex(vec2 polar){
 }
 
 /* posn: x, y coord, returns a complex */
-vec2 bundle_hex3(vec2 posn, float n, float m){
-    float xhex = xhex3(posn.x, posn.y);
-    float yhex = yhex3(posn.y);
-    vec2 p1 = unit_complex_fm_angle(n * xhex + m * yhex);
-    vec2 p2 = unit_complex_fm_angle(m * xhex - (n + m) * yhex);
-    vec2 p3 = unit_complex_fm_angle(-(n + m) * xhex + n * yhex);
-    return (p1 + p2 + p3) / 3.0;
+vec2 bundle_complex(vec2 posn){
+    float n = 1.0;
+    float m = 0.0;
+    return unit_complex_fm_angle(n * x_gen(posn.x, posn.y) + m * y_gen(posn.y));
 }
 
+/* returns complex from current posn in cartesian */
+vec2 general_fn(vec2 posn){
+    return bundle_complex(posn);
+}
 
 void main () {
 
@@ -95,19 +91,12 @@ void main () {
 	uv = uv * 2.0 - 1.0;
 	uv.x *= resolution.x / resolution.y;
 
-	//vec2 mn = resolution - mouse;
-	//mn.x = mn.x / resolution.x;
-	//mn.y = mn.y / resolution.y;
-	//mn = mn * 5.0 - 2.5;
 
-    float m = 3.0 * (mouse.x - 0.5);
-    float n = 3.0 * (mouse.y - 0.5);
+    vec2 z = uv;
 
-    /* complex */
-    vec2 z = bundle_hex3(uv, n, m);
+    z = general_fn(z);
 
     gl_FragColor = domainColoring(z, GRID_SPACING, DC_SATUR, DC_GRID_STR, DC_MAG_STR, DC_LINE_PWR);
 }
-
 
 
