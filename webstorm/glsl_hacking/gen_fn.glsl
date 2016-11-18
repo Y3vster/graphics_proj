@@ -1,16 +1,18 @@
+#define M_PI 3.1415926535897932384626433832795
+#define M_SQRT3 1.732050807568877
+
 #define GRID_SPACING vec2(1.0)
 #define DC_SATUR 0.7
 #define DC_GRID_STR 0.1
 #define DC_MAG_STR 0.2
 #define DC_LINE_PWR 5.0
+#define DC_NUM_COLOR_ADJ (2.0 * M_PI / 10.0)
 
 #ifdef GL_ES
 precision mediump float;
 #endif
 
 #extension GL_OES_standard_derivatives : enable
-#define M_PI 3.1415926535897932384626433832795
-#define M_SQRT3 1.732050807568877
 
 uniform float time;
 uniform vec2 mouse;
@@ -19,6 +21,8 @@ uniform vec2 resolution;
 int terms = 2;
 float n[10];
 float m[10];
+float r[10];    // radius
+float a[10];    // angle
 vec2 posn;
 
 vec3 hsv2rgb(vec3 c) {
@@ -55,7 +59,9 @@ vec4 domainColoring (vec2 z, vec2 gridSpacing, float saturation, float gridStren
 
   circ *= magStrength;
 
-  vec3 rgb = hsv2rgb(vec3(carg * 0.5 / M_PI, saturation, 0.5 + 0.5 * saturation - gridStrength * grid));
+  carg = mod(floor(carg / DC_NUM_COLOR_ADJ) * DC_NUM_COLOR_ADJ, 2.0 * M_PI);
+  vec3 rgb = hsv2rgb(vec3(carg, saturation, 0.5 + 0.5 * saturation - gridStrength * grid));
+  //vec3 rgb = hsv2rgb(vec3(carg * 0.5 / M_PI, saturation, 0.5 + 0.5 * saturation - gridStrength * grid));
   rgb *= (1.0 - circ);
   rgb += circ * vec3(1.0);
   return vec4(rgb, 1.0);
@@ -74,18 +80,24 @@ vec2 unit_complex_fm_angle(float a){
     return vec2(cos(a), sin(a));
 }
 
-vec2 polar_to_complex(vec2 polar){
-    return unit_complex_fm_angle(polar.x) * polar.y;
+vec2 polar_to_complex(float r, float a){
+    return unit_complex_fm_angle(a) * r;
 }
 
+vec2 complex_multiplication(vec2 s, vec2 t) {
+    float real      = s.x * t.x - s.y * t.y;
+    float imaginary = s.x * t.y + s.y * t.x;
+    return vec2(real, imaginary);
+}
 
 vec2 general_fn() {
     vec2 ans = vec2(0, 0);
     for (int k = 0; k < 10; k++) {
-	if (k == terms) break;	// workaround to loops being limited to constant expressions
-	vec2 thisterm = unit_complex_fm_angle(n[k] * xgen() + m[k] * ygen());
-	ans.x += thisterm.x;
-	ans.y += thisterm.y;
+        if (k == terms) break;	// workaround to loops being limited to constant expressions
+        vec2 thisterm = unit_complex_fm_angle(n[k] * xgen() + m[k] * ygen());
+        thisterm = complex_multiplication(thisterm, polar_to_complex(r[k], a[k]));
+        ans.x += thisterm.x;
+        ans.y += thisterm.y;
     }
     return ans;
 }
@@ -98,12 +110,19 @@ void main () {
 
 	n[0] = 2.0;
 	m[0] = 1.0;
+	r[0] = 0.5;
+	a[0] = 2.5;
+
 	n[1] = 2.0;
 	m[1] = 2.0;
+    r[1] = 1.5;
+    a[1] = -1.0;
 
 	for (int i = 2; i < 10; i++) {
 		n[i] = 0.0;
 		m[i] = 0.0;
+		r[i] = 1.0;
+		a[i] = 1.0;
 	}
 
     /* complex */
