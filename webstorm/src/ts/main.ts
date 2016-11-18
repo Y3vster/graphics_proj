@@ -80,7 +80,10 @@ function init() {
 
     uniforms = {
         time: {value: 1.0},
-        resolution: {value: new THREE.Vector2()}
+        resolution: {value: new THREE.Vector2()},
+        n_vals: {value: [1, 9, 4, 0, 0, 0, 0, 0, 0, 0]},
+        m_vals: {value: [1, 2, 1, 0, 0, 0, 0, 0, 0, 0]},
+        num_terms: {value: 4}
     };
 
 

@@ -15,10 +15,10 @@ precision mediump float;
 uniform float time;
 uniform vec2 mouse;
 uniform vec2 resolution;
+uniform int m_vals[10];
+uniform int n_vals[10];
+uniform int num_terms;
 
-int terms = 2;
-float n[10];
-float m[10];
 vec2 posn;
 
 vec3 hsv2rgb(vec3 c) {
@@ -82,10 +82,12 @@ vec2 polar_to_complex(vec2 polar){
 vec2 general_fn() {
     vec2 ans = vec2(0, 0);
     for (int k = 0; k < 10; k++) {
-	if (k == terms) break;	// workaround to loops being limited to constant expressions
-	vec2 thisterm = unit_complex_fm_angle(n[k] * xgen() + m[k] * ygen());
-	ans.x += thisterm.x;
-	ans.y += thisterm.y;
+        if (k == num_terms) break;	// workaround to loops being limited to constant expressions
+        float m = float(m_vals[k]);
+        float n = float(n_vals[k]);
+    	vec2 thisterm = unit_complex_fm_angle(n * xgen() + m * ygen());
+        ans.x += thisterm.x;
+        ans.y += thisterm.y;
     }
     return ans;
 }
@@ -96,20 +98,11 @@ void main () {
 	posn = posn * 2.0 - 1.0;
 	posn.x *= resolution.x / resolution.y;
 
-	n[0] = 2.0;
-	m[0] = 1.0;
-	n[1] = 2.0;
-	m[1] = 2.0;
-
-	for (int i = 2; i < 10; i++) {
-		n[i] = 0.0;
-		m[i] = 0.0;
-	}
-
     /* complex */
     vec2 z = general_fn();
 
     gl_FragColor = domainColoring(z, GRID_SPACING, DC_SATUR, DC_GRID_STR, DC_MAG_STR, DC_LINE_PWR);
 }
+
 
 
