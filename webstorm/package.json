@@ -48,7 +48,13 @@
   },
   "version": "5.3.0",
   "dependencies": {
+    "@types/dat-gui": "^0.6.0",
+    "@types/requirejs": "^2.1.28",
+    "@types/three": "0.0.24",
+    "glslify": "^6.0.1",
     "normalize.css": "^3.0.3",
+    "require": "^2.4.20",
+    "requirejs": "^2.3.2",
     "stats.js": "^0.16.0",
     "three.js": "^0.77.1"
   }

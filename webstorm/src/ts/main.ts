@@ -4,8 +4,14 @@
 /// <reference path="./dat.gui.d.ts" />
 /// <reference path="./three.d.ts" />
 /// <reference path="./jquery.d.ts" />
+/// <reference path="./requirejs.d.ts" />
 
-$($(".btn_group").click(function (event) {
+var container;
+var camera, scene, renderer;
+var material: THREE.ShaderMaterial, geometry;
+var uniforms;
+
+$($(".fn-btn").click(function (event) {
     var fileName = $(this).data("file");
     $.ajax({
         url: 'glsl/' + fileName,
@@ -16,6 +22,21 @@ $($(".btn_group").click(function (event) {
             material.needsUpdate = true;
         });
 }));
+
+
+var sidebarOpen;
+(function () {
+    $('#settings-button').click(
+        function () {
+            if (sidebarOpen) {
+                $('#sidebar').animate({width: 0})
+            } else {
+                $('#sidebar').animate({width: 240})
+            }
+            sidebarOpen = !sidebarOpen;
+        });
+})();
+
 
 // class MyUniforms{
 //     mn:THREE.Vector2;
@@ -38,17 +59,14 @@ var FizzyText = function () {
 
 window.onload = function () {
     var text = new FizzyText();
-    var gui = new dat.GUI();
+    var gui = new dat.GUI({autoPlace: false});
     gui.add(text, 'message');
     gui.add(text, 'speed', -5, 5);
     gui.add(text, 'displayOutline');
     gui.add(text, 'explode');
+    $('#dat-gui').append(gui.domElement);
 };
 
-var container;
-var camera, scene, renderer;
-var material, geometry;
-var uniforms;
 
 init();
 animate();
@@ -73,13 +91,13 @@ function init() {
     var origVertShader = document.getElementById('vertexShader').textContent;
     var origFragShader = document.getElementById('fragmentShader').textContent;
 
-    material = new THREE.ShaderMaterial( {
+    material = new THREE.ShaderMaterial({
         uniforms: uniforms,
         vertexShader: origVertShader,
         fragmentShader: origFragShader
-    } );
-    var mesh = new THREE.Mesh( geometry, material );
-    scene.add( mesh );
+    });
+    var mesh = new THREE.Mesh(geometry, material);
+    scene.add(mesh);
 
     renderer = new THREE.WebGLRenderer();
     renderer.setPixelRatio(window.devicePixelRatio);
@@ -102,16 +120,19 @@ function init() {
     onWindowResize(null);
     window.addEventListener('resize', onWindowResize, false);
 }
+
 function onWindowResize(event) {
     renderer.setSize(window.innerWidth, window.innerHeight);
     uniforms.resolution.value.x = renderer.domElement.width;
     uniforms.resolution.value.y = renderer.domElement.height;
 }
+
 //
 function animate() {
     requestAnimationFrame(animate);
     render();
 }
+
 function render() {
     uniforms.time.value += 0.05;
     renderer.render(scene, camera);
