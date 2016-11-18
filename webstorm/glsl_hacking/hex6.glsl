@@ -62,11 +62,11 @@ vec4 domainColoring (vec2 z, vec2 gridSpacing, float saturation, float gridStren
 }
 
 
-float xgen(){
+float xhex(){
     return 2.0 * M_PI * posn.x + 2.0 * M_PI * posn.y / M_SQRT3;
 }
 
-float ygen(){
+float yhex(){
     return 4.0 * M_PI * posn.y / M_SQRT3;
 }
 
@@ -78,14 +78,16 @@ vec2 polar_to_complex(vec2 polar){
     return unit_complex_fm_angle(polar.x) * polar.y;
 }
 
-
-vec2 general_fn() {
+vec2 hex6_fn() {
     vec2 ans = vec2(0, 0);
     for (int k = 0; k < 10; k++) {
 	if (k == terms) break;	// workaround to loops being limited to constant expressions
-	vec2 thisterm = unit_complex_fm_angle(n[k] * xgen() + m[k] * ygen());
-	ans.x += thisterm.x;
-	ans.y += thisterm.y;
+        vec2 p1 = vec2(cos(n[k] * xhex() + m[k] * yhex()), 0);
+    	vec2 p2 = vec2(cos(m[k] * xhex() - (n[k] + m[k]) * yhex()), 0);
+    	vec2 p3 = vec2(cos(-(n[k] + m[k]) * xhex() + n[k] * yhex()), 0);
+	    vec2 thisterm = (p1 + p2 + p3) / 3.0;
+        ans.x += thisterm.x;
+	    ans.y += thisterm.y;
     }
     return ans;
 }
@@ -107,7 +109,7 @@ void main () {
 	}
 
     /* complex */
-    vec2 z = general_fn();
+    vec2 z = hex6_fn();
 
     gl_FragColor = domainColoring(z, GRID_SPACING, DC_SATUR, DC_GRID_STR, DC_MAG_STR, DC_LINE_PWR);
 }

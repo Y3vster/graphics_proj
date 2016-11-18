@@ -10,16 +10,11 @@ precision mediump float;
 
 #extension GL_OES_standard_derivatives : enable
 #define M_PI 3.1415926535897932384626433832795
-#define M_SQRT3 1.732050807568877
+#define M_SQRT7 2.6457513111
 
 uniform float time;
 uniform vec2 mouse;
 uniform vec2 resolution;
-
-int terms = 2;
-float n[10];
-float m[10];
-vec2 posn;
 
 vec3 hsv2rgb(vec3 c) {
   vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
@@ -62,12 +57,12 @@ vec4 domainColoring (vec2 z, vec2 gridSpacing, float saturation, float gridStren
 }
 
 
-float xgen(){
-    return 2.0 * M_PI * posn.x + 2.0 * M_PI * posn.y / M_SQRT3;
+float x_loc(float x, float y){
+    return 2.0 * M_PI * x - 2.0 * M_PI * y / M_SQRT7;
 }
 
-float ygen(){
-    return 4.0 * M_PI * posn.y / M_SQRT3;
+float y_loc(float y){
+    return 4.0 * M_PI * y / M_SQRT7;
 }
 
 vec2 unit_complex_fm_angle(float a){
@@ -78,36 +73,29 @@ vec2 polar_to_complex(vec2 polar){
     return unit_complex_fm_angle(polar.x) * polar.y;
 }
 
-
-vec2 general_fn() {
-    vec2 ans = vec2(0, 0);
-    for (int k = 0; k < 10; k++) {
-	if (k == terms) break;	// workaround to loops being limited to constant expressions
-	vec2 thisterm = unit_complex_fm_angle(n[k] * xgen() + m[k] * ygen());
-	ans.x += thisterm.x;
-	ans.y += thisterm.y;
-    }
-    return ans;
+/* posn: x, y coord, returns a complex */
+vec2 bundle_complex(vec2 posn){
+    float n = 1.0;
+    float m = 0.0;
+    return (unit_complex_fm_angle((2.0 * n + m) * x_loc(posn.x, posn.y) + (-2.0 * m) * y_loc(posn.y)) +
+            unit_complex_fm_angle((2.0 * m + n) * x_loc(posn.x, posn.y) + (-2.0 * n) * y_loc(posn.y))) / 2.0;
 }
 
+/* returns complex from current posn in cartesian */
+vec2 loc_sym_fn(vec2 posn){
+    return bundle_complex(posn);
+}
 
 void main () {
-	posn = gl_FragCoord.xy / resolution.xy;
-	posn = posn * 2.0 - 1.0;
-	posn.x *= resolution.x / resolution.y;
 
-	n[0] = 2.0;
-	m[0] = 1.0;
-	n[1] = 2.0;
-	m[1] = 2.0;
+	vec2 uv = gl_FragCoord.xy / resolution.xy;
+	uv = uv * 2.0 - 1.0;
+	uv.x *= resolution.x / resolution.y;
 
-	for (int i = 2; i < 10; i++) {
-		n[i] = 0.0;
-		m[i] = 0.0;
-	}
 
-    /* complex */
-    vec2 z = general_fn();
+    vec2 z = uv;
+
+    z = loc_sym_fn(z);
 
     gl_FragColor = domainColoring(z, GRID_SPACING, DC_SATUR, DC_GRID_STR, DC_MAG_STR, DC_LINE_PWR);
 }
