@@ -17,15 +17,15 @@ $($(".btn_group").click(function (event) {
         });
 }));
 
-class MyUniforms{
-    mn:THREE.Vector2;
-    resolution:THREE.Vector2;
-    constructor(){
-        this.mn = new THREE.Vector2();
-    }
-}
-
-var uniforms = new MyUniforms();
+// class MyUniforms{
+//     mn:THREE.Vector2;
+//     resolution:THREE.Vector2;
+//     constructor(){
+//         this.mn = new THREE.Vector2();
+//     }
+// }
+//
+// var uniforms = new MyUniforms();
 
 var FizzyText = function () {
     this.message = 'dat.gui';
@@ -48,40 +48,71 @@ window.onload = function () {
 var container;
 var camera, scene, renderer;
 var material, geometry;
+var uniforms;
+
 init();
 animate();
 function init() {
-    container = document.getElementById( 'container' );
+    container = document.getElementById('container');
     camera = new THREE.Camera();
     camera.position.z = 1;
+
     scene = new THREE.Scene();
-    geometry = new THREE.PlaneBufferGeometry( 2, 2 );
+    geometry = new THREE.PlaneBufferGeometry(2, 2);
+
+    uniforms = {
+        time: {value: 1.0},
+        resolution: {value: new THREE.Vector2()}
+    };
+
+
     // uniforms = {
-    //     mn: { value: new THREE.Vector2() }
+    //     mn: {value: new THREE.Vector2()}
     // };
+
+    var origVertShader = document.getElementById('vertexShader').textContent;
+    var origFragShader = document.getElementById('fragmentShader').textContent;
+
     material = new THREE.ShaderMaterial( {
         uniforms: uniforms,
-        vertexShader: document.getElementById( 'vertexShader' ).textContent,
-        fragmentShader: document.getElementById( 'fragmentShader' ).textContent
+        vertexShader: origVertShader,
+        fragmentShader: origFragShader
     } );
     var mesh = new THREE.Mesh( geometry, material );
     scene.add( mesh );
+
     renderer = new THREE.WebGLRenderer();
-    renderer.setPixelRatio( window.devicePixelRatio );
-    container.appendChild( renderer.domElement );
-    onWindowResize();
-    window.addEventListener( 'resize', onWindowResize, false );
+    renderer.setPixelRatio(window.devicePixelRatio);
+
+    // var gl = renderer.context;
+    //
+    // var glVertexShader = new THREE.WebGLShader(gl, gl.VERTEX_SHADER, origVertShader);
+    // var glFragmentShader = new THREE.WebGLShader(gl, gl.FRAGMENT_SHADER, origFragShader);
+    //
+    // var program = gl.createProgram();
+    //
+    // gl.attachShader(program, glVertexShader);
+    // gl.attachShader(program, glFragmentShader);
+    //
+    // gl.linkProgram(program);
+    // gl.useProgram(program);
+
+
+    container.appendChild(renderer.domElement);
+    onWindowResize(null);
+    window.addEventListener('resize', onWindowResize, false);
 }
-function onWindowResize( event ) {
-    renderer.setSize( window.innerWidth, window.innerHeight );
+function onWindowResize(event) {
+    renderer.setSize(window.innerWidth, window.innerHeight);
     uniforms.resolution.value.x = renderer.domElement.width;
     uniforms.resolution.value.y = renderer.domElement.height;
 }
 //
 function animate() {
-    requestAnimationFrame( animate );
+    requestAnimationFrame(animate);
     render();
 }
 function render() {
-    renderer.render( scene, camera );
+    uniforms.time.value += 0.05;
+    renderer.render(scene, camera);
 }
