@@ -68,12 +68,12 @@ vec4 domainColoring (vec2 z, vec2 gridSpacing, float saturation, float gridStren
 }
 
 
-float xhex(){
-    return 2.0 * M_PI * posn.x + 2.0 * M_PI * posn.y / M_SQRT3;
+float xsquare(){
+    return 2.0 * M_PI * posn.x;
 }
 
-float yhex(){
-    return 4.0 * M_PI * posn.y / M_SQRT3;
+float ysquare(){
+    return 2.0 * M_PI * posn.y;
 }
 
 vec2 unit_complex_fm_angle(float a){
@@ -90,19 +90,20 @@ vec2 complex_multiplication(vec2 s, vec2 t) {
     return vec2(real, imaginary);
 }
 
-vec2 hex6_fn() {
+vec2 square_fn() {
     vec2 ans = vec2(0, 0);
     for (int k = 0; k < 10; k++) {
-	    if (k == terms) break;	// workaround to loops being limited to constant expressions
+        if (k == terms) break;	// workaround to loops being limited to constant expressions
 
-        vec2 p1 = unit_complex_fm_angle(n[k] * xhex() + m[k] * yhex());
-    	vec2 p2 = unit_complex_fm_angle(m[k] * xhex() - (n[k] + m[k]) * yhex());
-    	vec2 p3 = unit_complex_fm_angle(-(n[k] + m[k]) * xhex() + n[k] * yhex());
-	    vec2 thisterm = (p1 + p2 + p3) / 3.0;
+        vec2 p1 = unit_complex_fm_angle( n[k] * xsquare() + m[k] * ysquare());
+        vec2 p2 = unit_complex_fm_angle(-m[k] * xsquare() + n[k] * ysquare());
+        vec2 p3 = unit_complex_fm_angle(-n[k] * xsquare() - m[k] * ysquare());
+        vec2 p4 = unit_complex_fm_angle( m[k] * xsquare() - n[k] * ysquare());
+        vec2 thisterm = (p1 + p2 + p3 + p4) / 4.0;
 
         thisterm = complex_multiplication(thisterm, polar_to_complex(r[k], a[k]));
         ans.x += thisterm.x;
-	    ans.y += thisterm.y;
+        ans.y += thisterm.y;
     }
     return ans;
 }
@@ -131,7 +132,7 @@ void main () {
 	}
 
     /* complex */
-    vec2 z = hex6_fn();
+    vec2 z = square_fn();
 
     gl_FragColor = domainColoring(z, GRID_SPACING, DC_SATUR, DC_GRID_STR, DC_MAG_STR, DC_LINE_PWR);
 }

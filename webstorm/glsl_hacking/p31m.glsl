@@ -94,6 +94,7 @@ vec2 p31m_fn() {
     vec2 ans = vec2(0, 0);
     for (int k = 0; k < 10; k++) {
 	    if (k == terms) break;	// workaround to loops being limited to constant expressions
+
         vec2 p1 =   unit_complex_fm_angle(n[k] * xhex() + m[k] * yhex()) +
                     unit_complex_fm_angle(m[k] * xhex() + n[k] * yhex());
         vec2 p2 =   unit_complex_fm_angle(m[k] * xhex() - (n[k] + m[k]) * yhex()) +
@@ -101,6 +102,7 @@ vec2 p31m_fn() {
         vec2 p3 =   unit_complex_fm_angle(-(n[k] + m[k]) * xhex() + n[k] * yhex()) +
                     unit_complex_fm_angle(n[k] * xhex() - (n[k] + m[k]) * yhex());
 	    vec2 thisterm = (p1 + p2 + p3) / 6.0;
+
         thisterm = complex_multiplication(thisterm, polar_to_complex(r[k], a[k]));
         ans.x += thisterm.x;
         ans.y += thisterm.y;

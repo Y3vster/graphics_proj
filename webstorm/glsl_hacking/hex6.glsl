@@ -93,11 +93,13 @@ vec2 complex_multiplication(vec2 s, vec2 t) {
 vec2 hex6_fn() {
     vec2 ans = vec2(0, 0);
     for (int k = 0; k < 10; k++) {
-	if (k == terms) break;	// workaround to loops being limited to constant expressions
+	    if (k == terms) break;	// workaround to loops being limited to constant expressions
+
         vec2 p1 = vec2(cos(n[k] * xhex() + m[k] * yhex()), 0);
     	vec2 p2 = vec2(cos(m[k] * xhex() - (n[k] + m[k]) * yhex()), 0);
     	vec2 p3 = vec2(cos(-(n[k] + m[k]) * xhex() + n[k] * yhex()), 0);
 	    vec2 thisterm = (p1 + p2 + p3) / 3.0;
+
         thisterm = complex_multiplication(thisterm, polar_to_complex(r[k], a[k]));
         ans.x += thisterm.x;
 	    ans.y += thisterm.y;

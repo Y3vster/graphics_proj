@@ -93,13 +93,15 @@ vec2 complex_multiplication(vec2 s, vec2 t) {
 vec2 general_fn() {
     vec2 ans = vec2(0, 0);
     for (int k = 0; k < 10; k++) {
-	if (k == terms) break;	// workaround to loops being limited to constant expressions
-	vec2 p1 = unit_complex_fm_angle(n[k] * xgen() + m[k] * ygen());
-    vec2 p2 = unit_complex_fm_angle(-n[k] * xgen() - m[k] * ygen());
-	vec2 thisterm = (p1 + p2) / 2.0;
-	thisterm = complex_multiplication(thisterm, polar_to_complex(r[k], a[k]));
-	ans.x += thisterm.x;
-	ans.y += thisterm.y;
+        if (k == terms) break;	// workaround to loops being limited to constant expressions
+
+        vec2 p1 = unit_complex_fm_angle(n[k] * xgen() + m[k] * ygen());
+        vec2 p2 = unit_complex_fm_angle(-n[k] * xgen() - m[k] * ygen());
+        vec2 thisterm = (p1 + p2) / 2.0;
+
+        thisterm = complex_multiplication(thisterm, polar_to_complex(r[k], a[k]));
+        ans.x += thisterm.x;
+        ans.y += thisterm.y;
     }
     return ans;
 }
