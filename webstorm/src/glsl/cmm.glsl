@@ -17,12 +17,12 @@ precision mediump float;
 uniform float time;
 uniform vec2 mouse;
 uniform vec2 resolution;
+uniform int m_vals[10];
+uniform int n_vals[10];
+uniform int r_vals[10];
+uniform int a_vals[10];
+uniform int num_terms;
 
-int terms = 2;
-float n[10];
-float m[10];
-float r[10];    // radius
-float a[10];    // angle
 vec2 posn;
 
 vec3 hsv2rgb(vec3 c) {
@@ -68,12 +68,12 @@ vec4 domainColoring (vec2 z, vec2 gridSpacing, float saturation, float gridStren
 }
 
 
-float xhex(){
-    return 2.0 * M_PI * posn.x + 2.0 * M_PI * posn.y / M_SQRT3;
+float xrhombic2(){
+    return M_PI * (posn.x / KRHOMBIC2 + posn.y / LRHOMBIC2);
 }
 
-float yhex(){
-    return 4.0 * M_PI * posn.y / M_SQRT3;
+float yrhombic2(){
+    return M_PI * (posn.x / KRHOMBIC2 - posn.y / LRHOMBIC2);
 }
 
 vec2 unit_complex_fm_angle(float a){
@@ -90,19 +90,22 @@ vec2 complex_multiplication(vec2 s, vec2 t) {
     return vec2(real, imaginary);
 }
 
-vec2 hex6_fn() {
+vec2 cmm_fn() {
     vec2 ans = vec2(0, 0);
     for (int k = 0; k < 10; k++) {
-	    if (k == terms) break;	// workaround to loops being limited to constant expressions
+        if (k == num_terms) break;	// workaround to loops being limited to constant expressions
+        float m = float(m_vals[k]);
+        float n = float(n_vals[k]);
 
-        vec2 p1 = vec2(cos(n[k] * xhex() + m[k] * yhex()), 0);
-    	vec2 p2 = vec2(cos(m[k] * xhex() - (n[k] + m[k]) * yhex()), 0);
-    	vec2 p3 = vec2(cos(-(n[k] + m[k]) * xhex() + n[k] * yhex()), 0);
-	    vec2 thisterm = (p1 + p2 + p3) / 3.0;
+        vec2 p1 = unit_complex_fm_angle( n * xrhombic2() + m * yrhombic2()) +
+                  unit_complex_fm_angle( m * xrhombic2() + n * yrhombic2());
+        vec2 p2 = unit_complex_fm_angle(-n * xrhombic2() - m * yrhombic2()) +
+                  unit_complex_fm_angle(-m * xrhombic2() - n * yrhombic2());
+        vec2 thisterm = (p1 + p2) / 2.0;
 
         thisterm = complex_multiplication(thisterm, polar_to_complex(r[k], a[k]));
         ans.x += thisterm.x;
-	    ans.y += thisterm.y;
+        ans.y += thisterm.y;
     }
     return ans;
 }
@@ -113,25 +116,8 @@ void main () {
 	posn = posn * 2.0 - 1.0;
 	posn.x *= resolution.x / resolution.y;
 
-	n[0] = 2.0;
-	m[0] = 1.0;
-	r[0] = 0.5;
-	a[0] = 2.5;
-
-	n[1] = 2.0;
-	m[1] = 2.0;
-    r[1] = 1.5;
-    a[1] = -1.0;
-
-	for (int i = 2; i < 10; i++) {
-		n[i] = 0.0;
-		m[i] = 0.0;
-		r[i] = 1.0;
-		a[i] = 1.0;
-	}
-
     /* complex */
-    vec2 z = hex6_fn();
+    vec2 z = cmm_fn();
 
     gl_FragColor = domainColoring(z, GRID_SPACING, DC_SATUR, DC_GRID_STR, DC_MAG_STR, DC_LINE_PWR);
 }
