@@ -58,6 +58,7 @@ var FizzyText = function () {
 };
 
 window.onload = function () {
+    init();
     var text = new FizzyText();
     var gui = new dat.GUI({autoPlace: false});
     gui.add(text, 'message');
@@ -65,6 +66,7 @@ window.onload = function () {
     gui.add(text, 'displayOutline');
     gui.add(text, 'explode');
     $('#dat-gui').append(gui.domElement);
+    animate();
 };
 
 
