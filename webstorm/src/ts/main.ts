@@ -55,7 +55,27 @@ var FizzyText = function () {
     this.explode = function () {
 
     };
+
 };
+
+class TermPair {
+    fldr : dat.GUI;
+    constructor (folder : dat.GUI){
+        this.fldr = folder;
+    }
+    n: dat.GUIController;
+    m: dat.GUIController;
+
+    hide(){
+        this.n.domElement.parentElement.parentElement.style.display = 'none';
+        this.m.domElement.parentElement.parentElement.style.display = 'none';
+    }
+    show(){
+        this.n.domElement.parentElement.parentElement.style.display = 'list-item';
+        this.m.domElement.parentElement.parentElement.style.display = 'list-item';
+    }
+}
+
 
 window.onload = function () {
     init();
@@ -65,13 +85,52 @@ window.onload = function () {
     gui.add(text, 'speed', -5, 5);
     gui.add(text, 'displayOutline');
     gui.add(text, 'explode');
+
+    var num_terms_controller = gui
+        .add(uniforms.num_terms, 'value')
+        .min(1)
+        .max(10)
+        .step(1)
+        .name("# Terms");
+
+    let fldr = gui.addFolder("Terms");
+    let terms: Array<TermPair> = [];
+    let max_terms = 10;
+    for(i = 0; i < max_terms; i++){
+        let n = i + 1;
+        let pair = new TermPair(fldr);
+        pair.m = fldr.add(uniforms.m_vals.value, i.toString()).min(0).max(10).step(1).name('M' + n);
+        pair.n = fldr.add(uniforms.n_vals.value, i.toString()).min(0).max(10).step(1).name('N' + n);
+        terms.push(pair);
+    }
+
+    let num_terms = 5;
+
+    for (var i = num_terms; i < max_terms; i++) {
+        terms[i].hide();
+    }
+
+
+    num_terms_controller.onChange(function (value) {
+        if (num_terms < value) {
+            for (var i = num_terms - 1; i < (value-1); i++) {
+                terms[i].show();
+            }
+        }else if (num_terms > value) {
+            for (var i = num_terms - 1; i > (value-1); i--) {
+                terms[i].hide();
+            }
+        }
+        num_terms = value;
+    });
+
     $('#dat-gui').append(gui.domElement);
     animate();
 };
 
 
-init();
-animate();
+// init();
+// animate();
 function init() {
     container = document.getElementById('container');
     camera = new THREE.Camera();
