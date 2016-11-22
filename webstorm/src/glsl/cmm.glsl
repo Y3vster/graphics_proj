@@ -1,18 +1,19 @@
-#define M_PI 3.1415926535897932384626433832795
-#define M_SQRT3 1.732050807568877
+#extension GL_OES_standard_derivatives : enable
 
 #define GRID_SPACING vec2(1.0)
 #define DC_SATUR 0.7
 #define DC_GRID_STR 0.1
 #define DC_MAG_STR 0.2
 #define DC_LINE_PWR 5.0
-#define DC_NUM_COLOR_ADJ (2.0 * M_PI / 10.0)
 
 #ifdef GL_ES
 precision mediump float;
 #endif
 
-#extension GL_OES_standard_derivatives : enable
+#define M_PI 3.1415926535897932384626433832795
+#define M_SQRT3 1.732050807568877
+#define KRHOMBIC2 1.6
+#define LRHOMBIC2 1.0
 
 uniform float time;
 uniform vec2 mouse;
@@ -59,9 +60,7 @@ vec4 domainColoring (vec2 z, vec2 gridSpacing, float saturation, float gridStren
 
   circ *= magStrength;
 
-  carg = mod(floor(carg / DC_NUM_COLOR_ADJ) * DC_NUM_COLOR_ADJ, 2.0 * M_PI);
-  vec3 rgb = hsv2rgb(vec3(carg, saturation, 0.5 + 0.5 * saturation - gridStrength * grid));
-  //vec3 rgb = hsv2rgb(vec3(carg * 0.5 / M_PI, saturation, 0.5 + 0.5 * saturation - gridStrength * grid));
+  vec3 rgb = hsv2rgb(vec3(carg * 0.5 / M_PI, saturation, 0.5 + 0.5 * saturation - gridStrength * grid));
   rgb *= (1.0 - circ);
   rgb += circ * vec3(1.0);
   return vec4(rgb, 1.0);
@@ -103,7 +102,7 @@ vec2 cmm_fn() {
                   unit_complex_fm_angle(-m * xrhombic2() - n * yrhombic2());
         vec2 thisterm = (p1 + p2) / 2.0;
 
-        thisterm = complex_multiplication(thisterm, polar_to_complex(r[k], a[k]));
+        thisterm = complex_multiplication(thisterm, polar_to_complex(float(r_vals[k]), float(a_vals[k])));
         ans.x += thisterm.x;
         ans.y += thisterm.y;
     }

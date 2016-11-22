@@ -83,6 +83,8 @@ function init() {
         resolution: {value: new THREE.Vector2()},
         n_vals: {value: [1, 9, 4, 0, 0, 0, 0, 0, 0, 0]},
         m_vals: {value: [1, 2, 1, 0, 0, 0, 0, 0, 0, 0]},
+        r_vals: {value: [0.5, 1.5, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]},
+        a_vals: {value: [2.5, 1.0, 0.0, -1.0, -2.5, 0.0, 0,0, 0.0, 0.0, 0.0]},
         num_terms: {value: 4}
     };
 

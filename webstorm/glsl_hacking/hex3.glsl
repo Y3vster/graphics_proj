@@ -90,7 +90,7 @@ vec2 complex_multiplication(vec2 s, vec2 t) {
     return vec2(real, imaginary);
 }
 
-vec2 hex6_fn() {
+vec2 hex3_fn() {
     vec2 ans = vec2(0, 0);
     for (int k = 0; k < 10; k++) {
 	    if (k == terms) break;	// workaround to loops being limited to constant expressions
@@ -131,7 +131,7 @@ void main () {
 	}
 
     /* complex */
-    vec2 z = hex6_fn();
+    vec2 z = hex3_fn();
 
     gl_FragColor = domainColoring(z, GRID_SPACING, DC_SATUR, DC_GRID_STR, DC_MAG_STR, DC_LINE_PWR);
 }

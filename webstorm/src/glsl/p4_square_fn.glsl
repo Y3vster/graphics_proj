@@ -59,9 +59,7 @@ vec4 domainColoring (vec2 z, vec2 gridSpacing, float saturation, float gridStren
 
   circ *= magStrength;
 
-  carg = mod(floor(carg / DC_NUM_COLOR_ADJ) * DC_NUM_COLOR_ADJ, 2.0 * M_PI);
-  vec3 rgb = hsv2rgb(vec3(carg, saturation, 0.5 + 0.5 * saturation - gridStrength * grid));
-  //vec3 rgb = hsv2rgb(vec3(carg * 0.5 / M_PI, saturation, 0.5 + 0.5 * saturation - gridStrength * grid));
+  vec3 rgb = hsv2rgb(vec3(carg * 0.5 / M_PI, saturation, 0.5 + 0.5 * saturation - gridStrength * grid));
   rgb *= (1.0 - circ);
   rgb += circ * vec3(1.0);
   return vec4(rgb, 1.0);
@@ -103,7 +101,7 @@ vec2 p4_fn() {
         vec2 p4 = unit_complex_fm_angle( m * xsquare() - n * ysquare());
         vec2 thisterm = (p1 + p2 + p3 + p4) / 4.0;
 
-        thisterm = complex_multiplication(thisterm, polar_to_complex(r[k], a[k]));
+        thisterm = complex_multiplication(thisterm, polar_to_complex(float(r_vals[k]), float(a_vals[k])));
         ans.x += thisterm.x;
         ans.y += thisterm.y;
     }

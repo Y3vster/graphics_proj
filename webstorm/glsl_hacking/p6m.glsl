@@ -67,7 +67,6 @@ vec4 domainColoring (vec2 z, vec2 gridSpacing, float saturation, float gridStren
   return vec4(rgb, 1.0);
 }
 
-
 float xhex(){
     return 2.0 * M_PI * posn.x + 2.0 * M_PI * posn.y / M_SQRT3;
 }
