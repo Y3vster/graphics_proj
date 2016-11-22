@@ -65,11 +65,11 @@ vec4 domainColoring (vec2 z, vec2 gridSpacing, float saturation, float gridStren
 }
 
 
-float xhex(){
+float xgen(){
     return 2.0 * M_PI * posn.x + 2.0 * M_PI * posn.y / M_SQRT3;
 }
 
-float yhex(){
+float ygen(){
     return 4.0 * M_PI * posn.y / M_SQRT3;
 }
 
@@ -87,17 +87,14 @@ vec2 complex_multiplication(vec2 s, vec2 t) {
     return vec2(real, imaginary);
 }
 
-vec2 hex3_fn() {
+vec2 general_fn() {
     vec2 ans = vec2(0, 0);
     for (int k = 0; k < 10; k++) {
         if (k == num_terms) break;	// workaround to loops being limited to constant expressions
         float m = float(m_vals[k]);
         float n = float(n_vals[k]);
 
-        vec2 p1 = unit_complex_fm_angle(  n      * xhex() +      m  * yhex());
-        vec2 p2 = unit_complex_fm_angle(      m  * xhex() - (n + m) * yhex());
-        vec2 p3 = unit_complex_fm_angle(-(n + m) * xhex() +  n      * yhex());
-        vec2 thisterm = (p1 + p2 + p3) / 3.0;
+    	vec2 thisterm = unit_complex_fm_angle(n * xgen() + m * ygen());
 
         thisterm = complex_multiplication(thisterm, polar_to_complex(float(r_vals[k]), float(a_vals[k])));
         ans.x += thisterm.x;
@@ -113,9 +110,10 @@ void main () {
 	posn.x *= resolution.x / resolution.y;
 
     /* complex */
-    vec2 z = hex3_fn();
+    vec2 z = general_fn();
 
     gl_FragColor = domainColoring(z, GRID_SPACING, DC_SATUR, DC_GRID_STR, DC_MAG_STR, DC_LINE_PWR);
 }
+
 
 

@@ -1,27 +1,28 @@
-#extension GL_OES_standard_derivatives : enable
+#define M_PI 3.1415926535897932384626433832795
+#define M_SQRT3 1.732050807568877
 
 #define GRID_SPACING vec2(1.0)
 #define DC_SATUR 0.7
 #define DC_GRID_STR 0.1
 #define DC_MAG_STR 0.2
 #define DC_LINE_PWR 5.0
+#define DC_NUM_COLOR_ADJ (2.0 * M_PI / 10.0)
 
 #ifdef GL_ES
 precision mediump float;
 #endif
 
-#define M_PI 3.1415926535897932384626433832795
-#define M_SQRT3 1.732050807568877
+#extension GL_OES_standard_derivatives : enable
 
 uniform float time;
 uniform vec2 mouse;
 uniform vec2 resolution;
-uniform int m_vals[10];
-uniform int n_vals[10];
-uniform float r_vals[10];
-uniform float a_vals[10];
-uniform int num_terms;
 
+int terms = 2;
+float n[10];
+float m[10];
+float r[10];    // radius
+float a[10];    // angle
 vec2 posn;
 
 vec3 hsv2rgb(vec3 c) {
@@ -58,18 +59,20 @@ vec4 domainColoring (vec2 z, vec2 gridSpacing, float saturation, float gridStren
 
   circ *= magStrength;
 
-  vec3 rgb = hsv2rgb(vec3(carg * 0.5 / M_PI, saturation, 0.5 + 0.5 * saturation - gridStrength * grid));
+  carg = mod(floor(carg / DC_NUM_COLOR_ADJ) * DC_NUM_COLOR_ADJ, 2.0 * M_PI);
+  vec3 rgb = hsv2rgb(vec3(carg, saturation, 0.5 + 0.5 * saturation - gridStrength * grid));
+  //vec3 rgb = hsv2rgb(vec3(carg * 0.5 / M_PI, saturation, 0.5 + 0.5 * saturation - gridStrength * grid));
   rgb *= (1.0 - circ);
   rgb += circ * vec3(1.0);
   return vec4(rgb, 1.0);
 }
 
 
-float xhex(){
+float xgen(){
     return 2.0 * M_PI * posn.x + 2.0 * M_PI * posn.y / M_SQRT3;
 }
 
-float yhex(){
+float ygen(){
     return 4.0 * M_PI * posn.y / M_SQRT3;
 }
 
@@ -87,19 +90,16 @@ vec2 complex_multiplication(vec2 s, vec2 t) {
     return vec2(real, imaginary);
 }
 
-vec2 hex3_fn() {
+vec2 general_fn() {
     vec2 ans = vec2(0, 0);
     for (int k = 0; k < 10; k++) {
-        if (k == num_terms) break;	// workaround to loops being limited to constant expressions
-        float m = float(m_vals[k]);
-        float n = float(n_vals[k]);
+        if (k == terms) break;	// workaround to loops being limited to constant expressions
 
-        vec2 p1 = unit_complex_fm_angle(  n      * xhex() +      m  * yhex());
-        vec2 p2 = unit_complex_fm_angle(      m  * xhex() - (n + m) * yhex());
-        vec2 p3 = unit_complex_fm_angle(-(n + m) * xhex() +  n      * yhex());
-        vec2 thisterm = (p1 + p2 + p3) / 3.0;
+        vec2 p1 = unit_complex_fm_angle(n[k] * xgen() + m[k] * ygen());
+        vec2 p2 = unit_complex_fm_angle(-n[k] * xgen() - m[k] * ygen());
+        vec2 thisterm = (p1 + p2) / 2.0;
 
-        thisterm = complex_multiplication(thisterm, polar_to_complex(float(r_vals[k]), float(a_vals[k])));
+        thisterm = complex_multiplication(thisterm, polar_to_complex(r[k], a[k]));
         ans.x += thisterm.x;
         ans.y += thisterm.y;
     }
@@ -112,8 +112,25 @@ void main () {
 	posn = posn * 2.0 - 1.0;
 	posn.x *= resolution.x / resolution.y;
 
+	n[0] = 2.0;
+	m[0] = 1.0;
+	r[0] = 0.5;
+	a[0] = 2.5;
+
+	n[1] = 2.0;
+	m[1] = 2.0;
+    r[1] = 1.5;
+    a[1] = -1.0;
+
+	for (int i = 2; i < 10; i++) {
+		n[i] = 0.0;
+		m[i] = 0.0;
+		r[i] = 1.0;
+		a[i] = 1.0;
+	}
+
     /* complex */
-    vec2 z = hex3_fn();
+    vec2 z = general_fn();
 
     gl_FragColor = domainColoring(z, GRID_SPACING, DC_SATUR, DC_GRID_STR, DC_MAG_STR, DC_LINE_PWR);
 }

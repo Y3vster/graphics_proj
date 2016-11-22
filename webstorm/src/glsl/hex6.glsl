@@ -1,3 +1,5 @@
+#extension GL_OES_standard_derivatives : enable
+
 #define GRID_SPACING vec2(1.0)
 #define DC_SATUR 0.7
 #define DC_GRID_STR 0.1
@@ -8,7 +10,6 @@
 precision mediump float;
 #endif
 
-#extension GL_OES_standard_derivatives : enable
 #define M_PI 3.1415926535897932384626433832795
 #define M_SQRT3 1.732050807568877
 
@@ -17,6 +18,8 @@ uniform vec2 mouse;
 uniform vec2 resolution;
 uniform int m_vals[10];
 uniform int n_vals[10];
+uniform float r_vals[10];
+uniform float a_vals[10];
 uniform int num_terms;
 
 vec2 posn;
@@ -62,11 +65,11 @@ vec4 domainColoring (vec2 z, vec2 gridSpacing, float saturation, float gridStren
 }
 
 
-float xgen(){
+float xhex(){
     return 2.0 * M_PI * posn.x + 2.0 * M_PI * posn.y / M_SQRT3;
 }
 
-float ygen(){
+float yhex(){
     return 4.0 * M_PI * posn.y / M_SQRT3;
 }
 
@@ -74,18 +77,29 @@ vec2 unit_complex_fm_angle(float a){
     return vec2(cos(a), sin(a));
 }
 
-vec2 polar_to_complex(vec2 polar){
-    return unit_complex_fm_angle(polar.x) * polar.y;
+vec2 polar_to_complex(float r, float a){
+    return unit_complex_fm_angle(a) * r;
 }
 
+vec2 complex_multiplication(vec2 s, vec2 t) {
+    float real      = s.x * t.x - s.y * t.y;
+    float imaginary = s.x * t.y + s.y * t.x;
+    return vec2(real, imaginary);
+}
 
-vec2 general_fn() {
+vec2 hex6_fn() {
     vec2 ans = vec2(0, 0);
     for (int k = 0; k < 10; k++) {
         if (k == num_terms) break;	// workaround to loops being limited to constant expressions
         float m = float(m_vals[k]);
         float n = float(n_vals[k]);
-    	vec2 thisterm = unit_complex_fm_angle(n * xgen() + m * ygen());
+
+        vec2 p1 = vec2(cos(n * xhex() + m * yhex()), 0);
+    	vec2 p2 = vec2(cos(m * xhex() - (n + m) * yhex()), 0);
+    	vec2 p3 = vec2(cos(-(n + m) * xhex() + n * yhex()), 0);
+	    vec2 thisterm = (p1 + p2 + p3) / 3.0;
+
+        thisterm = complex_multiplication(thisterm, polar_to_complex(float(r_vals[k]), float(a_vals[k])));
         ans.x += thisterm.x;
         ans.y += thisterm.y;
     }
@@ -99,10 +113,9 @@ void main () {
 	posn.x *= resolution.x / resolution.y;
 
     /* complex */
-    vec2 z = general_fn();
+    vec2 z = hex6_fn();
 
     gl_FragColor = domainColoring(z, GRID_SPACING, DC_SATUR, DC_GRID_STR, DC_MAG_STR, DC_LINE_PWR);
 }
-
 
 
