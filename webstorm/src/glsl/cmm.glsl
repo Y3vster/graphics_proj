@@ -20,8 +20,8 @@ uniform vec2 mouse;
 uniform vec2 resolution;
 uniform int m_vals[10];
 uniform int n_vals[10];
-uniform int r_vals[10];
-uniform int a_vals[10];
+uniform float r_vals[10];
+uniform float a_vals[10];
 uniform int num_terms;
 
 vec2 posn;
