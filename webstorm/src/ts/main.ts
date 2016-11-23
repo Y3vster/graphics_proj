@@ -113,7 +113,7 @@ window.onload = function () {
 
     num_terms_controller.onChange(function (value) {
         if (num_terms < value) {
-            for (var i = num_terms - 1; i < (value-1); i++) {
+            for (var i = num_terms - 1; i < value; i++) {
                 terms[i].show();
             }
         }else if (num_terms > value) {
