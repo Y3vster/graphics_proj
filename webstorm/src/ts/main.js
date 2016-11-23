@@ -9,17 +9,26 @@ var container;
 var camera, scene, renderer;
 var material, geometry;
 var uniforms;
-$($(".fn-btn").click(function (event) {
-    var fileName = $(this).data("file");
+function load_shader(name) {
     $.ajax({
-        url: 'glsl/' + fileName,
+        url: 'glsl/' + name,
         dataType: 'text'
-    })
-        .done(function (data) {
+    }).done(function (data) {
         material.fragmentShader = data;
         material.needsUpdate = true;
     });
-}));
+}
+// $($(".fn-btn").click(function (event) {
+//     var fileName = $(this).data("file");
+//     $.ajax({
+//         url: 'glsl/' + fileName,
+//         dataType: 'text'
+//     })
+//         .done(function (data) {
+//             material.fragmentShader = data;
+//             material.needsUpdate = true;
+//         });
+// }));
 var sidebarOpen;
 (function () {
     $('#settings-button').click(function () {
@@ -48,17 +57,81 @@ var FizzyText = function () {
     this.explode = function () {
     };
 };
+var TermSet = (function () {
+    function TermSet(folder) {
+        this.fldr = folder;
+    }
+    TermSet.prototype.hide = function () {
+        this.n.domElement.parentElement.parentElement.style.display = 'none';
+        this.m.domElement.parentElement.parentElement.style.display = 'none';
+        this.r.domElement.parentElement.parentElement.style.display = 'none';
+        this.a.domElement.parentElement.parentElement.style.display = 'none';
+    };
+    TermSet.prototype.show = function () {
+        this.n.domElement.parentElement.parentElement.style.display = 'list-item';
+        this.m.domElement.parentElement.parentElement.style.display = 'list-item';
+        this.r.domElement.parentElement.parentElement.style.display = 'list-item';
+        this.a.domElement.parentElement.parentElement.style.display = 'list-item';
+    };
+    return TermSet;
+}());
 window.onload = function () {
+    init();
     var text = new FizzyText();
     var gui = new dat.GUI({ autoPlace: false });
-    gui.add(text, 'message');
-    gui.add(text, 'speed', -5, 5);
-    gui.add(text, 'displayOutline');
-    gui.add(text, 'explode');
+    /*
+     Create a folder with the available shaders
+     */
+    var file_names = JSON.parse($("#shader-filelist").html()).shader_files;
+    var shader_load_fns = file_names.map(function (name) {
+        return function () { load_shader(name); };
+    });
+    var shadersFolder = gui.addFolder("Groups");
+    for (var i = 0; i < file_names.length; i++) {
+        shadersFolder.add(shader_load_fns, i.toString()).name(file_names[i]);
+    }
+    shadersFolder.open();
+    var num_terms_controller = gui
+        .add(uniforms.num_terms, 'value')
+        .min(1)
+        .max(10)
+        .step(1)
+        .name("# Terms");
+    var fldr = gui.addFolder("Terms");
+    var terms = [];
+    var max_terms = 10;
+    for (i = 0; i < max_terms; i++) {
+        var n = i + 1;
+        var set = new TermSet(fldr);
+        set.m = fldr.add(uniforms.m_vals.value, i.toString()).min(0).max(10).step(1).name('M' + n);
+        set.n = fldr.add(uniforms.n_vals.value, i.toString()).min(0).max(10).step(1).name('N' + n);
+        set.r = fldr.add(uniforms.r_vals.value, i.toString()).min(0).max(10).step(0.5).name('R' + n);
+        set.a = fldr.add(uniforms.a_vals.value, i.toString()).min(-3).max(3).step(0.1).name('A' + n);
+        terms.push(set);
+    }
+    fldr.open();
+    var num_terms = 5;
+    for (var i = num_terms; i < max_terms; i++) {
+        terms[i].hide();
+    }
+    num_terms_controller.onChange(function (value) {
+        if (num_terms < value) {
+            for (var i = num_terms - 1; i < value; i++) {
+                terms[i].show();
+            }
+        }
+        else if (num_terms > value) {
+            for (var i = num_terms - 1; i > (value - 1); i--) {
+                terms[i].hide();
+            }
+        }
+        num_terms = value;
+    });
     $('#dat-gui').append(gui.domElement);
+    animate();
 };
-init();
-animate();
+// init();
+// animate();
 function init() {
     container = document.getElementById('container');
     camera = new THREE.Camera();
@@ -68,10 +141,10 @@ function init() {
     uniforms = {
         time: { value: 1.0 },
         resolution: { value: new THREE.Vector2() },
-        n_vals: { value: [1, 3, 4, 0, 0, 0, 0, 0, 0, 0] },
-        m_vals: { value: [2, 2, 1, 0, 0, 0, 0, 0, 0, 0] },
-        r_vals: { value: [0.5, 1.5, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0] },
-        a_vals: { value: [2.5, 1.0, 0.0, -1.0, -2.5, 0.0, 0, 0, 0.0, 0.0, 0.0] },
+        n_vals: { value: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] },
+        m_vals: { value: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0] },
+        r_vals: { value: [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0] },
+        a_vals: { value: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0, 0, 0.0, 0.0, 0.0] },
         num_terms: { value: 1 }
     };
     // uniforms = {

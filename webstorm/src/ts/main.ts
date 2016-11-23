@@ -69,7 +69,7 @@ var FizzyText = function () {
 
 };
 
-class TermPair {
+class TermSet {
     fldr: dat.GUI;
 
     constructor(folder: dat.GUI) {
@@ -78,15 +78,21 @@ class TermPair {
 
     n: dat.GUIController;
     m: dat.GUIController;
+    r: dat.GUIController;
+    a: dat.GUIController;
 
     hide() {
         this.n.domElement.parentElement.parentElement.style.display = 'none';
         this.m.domElement.parentElement.parentElement.style.display = 'none';
+        this.r.domElement.parentElement.parentElement.style.display = 'none';
+        this.a.domElement.parentElement.parentElement.style.display = 'none';
     }
 
     show() {
         this.n.domElement.parentElement.parentElement.style.display = 'list-item';
         this.m.domElement.parentElement.parentElement.style.display = 'list-item';
+        this.r.domElement.parentElement.parentElement.style.display = 'list-item';
+        this.a.domElement.parentElement.parentElement.style.display = 'list-item';
     }
 }
 
@@ -119,14 +125,16 @@ window.onload = function () {
         .name("# Terms");
 
     let fldr = gui.addFolder("Terms");
-    let terms: Array<TermPair> = [];
+    let terms: Array<TermSet> = [];
     let max_terms = 10;
     for (i = 0; i < max_terms; i++) {
         let n = i + 1;
-        let pair = new TermPair(fldr);
-        pair.m = fldr.add(uniforms.m_vals.value, i.toString()).min(0).max(10).step(1).name('M' + n);
-        pair.n = fldr.add(uniforms.n_vals.value, i.toString()).min(0).max(10).step(1).name('N' + n);
-        terms.push(pair);
+        let set = new TermSet(fldr);
+        set.m = fldr.add(uniforms.m_vals.value, i.toString()).min(0).max(10).step(1).name('M' + n);
+        set.n = fldr.add(uniforms.n_vals.value, i.toString()).min(0).max(10).step(1).name('N' + n);
+        set.r = fldr.add(uniforms.r_vals.value, i.toString()).min(0).max(10).step(0.5).name('R' + n);
+        set.a = fldr.add(uniforms.a_vals.value, i.toString()).min(-3).max(3).step(0.1).name('A' + n);
+        terms.push(set);
     }
 
     fldr.open();
@@ -169,10 +177,10 @@ function init() {
     uniforms = {
         time: {value: 1.0},
         resolution: {value: new THREE.Vector2()},
-        n_vals: {value: [1, 3, 4, 0, 0, 0, 0, 0, 0, 0]},
-        m_vals: {value: [2, 2, 1, 0, 0, 0, 0, 0, 0, 0]},
-        r_vals: {value: [0.5, 1.5, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]},
-        a_vals: {value: [2.5, 1.0, 0.0, -1.0, -2.5, 0.0, 0, 0, 0.0, 0.0, 0.0]},
+        n_vals: {value: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]},
+        m_vals: {value: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]},
+        r_vals: {value: [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]},
+        a_vals: {value: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0, 0, 0.0, 0.0, 0.0]},
         num_terms: {value: 1}
     };
 
