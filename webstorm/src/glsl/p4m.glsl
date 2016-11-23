@@ -1,17 +1,18 @@
-#extension GL_OES_standard_derivatives : enable
+#define M_PI 3.1415926535897932384626433832795
+#define M_SQRT3 1.732050807568877
 
 #define GRID_SPACING vec2(1.0)
 #define DC_SATUR 0.7
 #define DC_GRID_STR 0.1
 #define DC_MAG_STR 0.2
 #define DC_LINE_PWR 5.0
+#define DC_NUM_COLOR_ADJ (2.0 * M_PI / 10.0)
 
 #ifdef GL_ES
 precision mediump float;
 #endif
 
-#define M_PI 3.1415926535897932384626433832795
-#define M_SQRT3 1.732050807568877
+#extension GL_OES_standard_derivatives : enable
 
 uniform float time;
 uniform vec2 mouse;
@@ -87,7 +88,7 @@ vec2 complex_multiplication(vec2 s, vec2 t) {
     return vec2(real, imaginary);
 }
 
-vec2 p4_fn() {
+vec2 p4m_fn() {
     vec2 ans = vec2(0, 0);
     for (int k = 0; k < 10; k++) {
         if (k == num_terms) break;	// workaround to loops being limited to constant expressions
@@ -98,7 +99,11 @@ vec2 p4_fn() {
         vec2 p2 = unit_complex_fm_angle(-m * xsquare() + n * ysquare());
         vec2 p3 = unit_complex_fm_angle(-n * xsquare() - m * ysquare());
         vec2 p4 = unit_complex_fm_angle( m * xsquare() - n * ysquare());
-        vec2 thisterm = (p1 + p2 + p3 + p4) / 4.0;
+        vec2 p5 = unit_complex_fm_angle( m * xsquare() + n * ysquare());
+        vec2 p6 = unit_complex_fm_angle(-n * xsquare() + m * ysquare());
+        vec2 p7 = unit_complex_fm_angle(-m * xsquare() - n * ysquare());
+        vec2 p8 = unit_complex_fm_angle( n * xsquare() - m * ysquare());
+        vec2 thisterm = (p1 + p2 + p3 + p4 + p5 + p6 + p7 + p8) / 4.0;
 
         thisterm = complex_multiplication(thisterm, polar_to_complex(float(r_vals[k]), float(a_vals[k])));
         ans.x += thisterm.x;
@@ -114,7 +119,7 @@ void main () {
 	posn.x *= resolution.x / resolution.y;
 
     /* complex */
-    vec2 z = p4_fn();
+    vec2 z = p4m_fn();
 
     gl_FragColor = domainColoring(z, GRID_SPACING, DC_SATUR, DC_GRID_STR, DC_MAG_STR, DC_LINE_PWR);
 }

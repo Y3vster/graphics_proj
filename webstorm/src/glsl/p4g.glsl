@@ -1,18 +1,17 @@
-#define M_PI 3.1415926535897932384626433832795
-#define M_SQRT3 1.732050807568877
+#extension GL_OES_standard_derivatives : enable
 
 #define GRID_SPACING vec2(1.0)
 #define DC_SATUR 0.7
 #define DC_GRID_STR 0.1
 #define DC_MAG_STR 0.2
 #define DC_LINE_PWR 5.0
-#define DC_NUM_COLOR_ADJ (2.0 * M_PI / 10.0)
 
 #ifdef GL_ES
 precision mediump float;
 #endif
 
-#extension GL_OES_standard_derivatives : enable
+#define M_PI 3.1415926535897932384626433832795
+#define M_SQRT3 1.732050807568877
 
 uniform float time;
 uniform vec2 mouse;

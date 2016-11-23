@@ -12,6 +12,8 @@ precision mediump float;
 
 #define M_PI 3.1415926535897932384626433832795
 #define M_SQRT3 1.732050807568877
+#define KRECT 1.0
+#define LRECT 0.5
 
 uniform float time;
 uniform vec2 mouse;
@@ -65,12 +67,12 @@ vec4 domainColoring (vec2 z, vec2 gridSpacing, float saturation, float gridStren
 }
 
 
-float xsquare(){
-    return 2.0 * M_PI * posn.x;
+float xrect(){
+    return 2.0 * M_PI * posn.x / KRECT;
 }
 
-float ysquare(){
-    return 2.0 * M_PI * posn.y;
+float yrect(){
+    return 2.0 * M_PI * posn.y / LRECT;
 }
 
 vec2 unit_complex_fm_angle(float a){
@@ -87,18 +89,18 @@ vec2 complex_multiplication(vec2 s, vec2 t) {
     return vec2(real, imaginary);
 }
 
-vec2 p4_fn() {
+vec2 pmm_fn() {
     vec2 ans = vec2(0, 0);
     for (int k = 0; k < 10; k++) {
         if (k == num_terms) break;	// workaround to loops being limited to constant expressions
         float m = float(m_vals[k]);
         float n = float(n_vals[k]);
 
-        vec2 p1 = unit_complex_fm_angle( n * xsquare() + m * ysquare());
-        vec2 p2 = unit_complex_fm_angle(-m * xsquare() + n * ysquare());
-        vec2 p3 = unit_complex_fm_angle(-n * xsquare() - m * ysquare());
-        vec2 p4 = unit_complex_fm_angle( m * xsquare() - n * ysquare());
-        vec2 thisterm = (p1 + p2 + p3 + p4) / 4.0;
+        vec2 p1 = (unit_complex_fm_angle( n * xrect() + m * yrect()) +
+                   unit_complex_fm_angle(-n * xrect() + m * yrect())) / 4.0;
+        vec2 p2 = (unit_complex_fm_angle(-n * xrect() - m * yrect()) +
+                   unit_complex_fm_angle( n * xrect() - m * yrect())) / 4.0;
+        vec2 thisterm = p1 + p2;
 
         thisterm = complex_multiplication(thisterm, polar_to_complex(float(r_vals[k]), float(a_vals[k])));
         ans.x += thisterm.x;
@@ -114,7 +116,7 @@ void main () {
 	posn.x *= resolution.x / resolution.y;
 
     /* complex */
-    vec2 z = p4_fn();
+    vec2 z = pmm_fn();
 
     gl_FragColor = domainColoring(z, GRID_SPACING, DC_SATUR, DC_GRID_STR, DC_MAG_STR, DC_LINE_PWR);
 }
