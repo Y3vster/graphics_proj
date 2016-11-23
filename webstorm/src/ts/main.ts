@@ -11,17 +11,28 @@ var camera, scene, renderer;
 var material: THREE.ShaderMaterial, geometry;
 var uniforms;
 
-$($(".fn-btn").click(function (event) {
-    var fileName = $(this).data("file");
+function load_shader(name: string) {
     $.ajax({
-        url: 'glsl/' + fileName,
+        url: 'glsl/' + name,
         dataType: 'text'
-    })
-        .done(function (data) {
-            material.fragmentShader = data;
-            material.needsUpdate = true;
-        });
-}));
+    }).done(function (data) {
+        material.fragmentShader = data;
+        material.needsUpdate = true;
+    });
+
+}
+
+// $($(".fn-btn").click(function (event) {
+//     var fileName = $(this).data("file");
+//     $.ajax({
+//         url: 'glsl/' + fileName,
+//         dataType: 'text'
+//     })
+//         .done(function (data) {
+//             material.fragmentShader = data;
+//             material.needsUpdate = true;
+//         });
+// }));
 
 
 var sidebarOpen;
@@ -59,18 +70,21 @@ var FizzyText = function () {
 };
 
 class TermPair {
-    fldr : dat.GUI;
-    constructor (folder : dat.GUI){
+    fldr: dat.GUI;
+
+    constructor(folder: dat.GUI) {
         this.fldr = folder;
     }
+
     n: dat.GUIController;
     m: dat.GUIController;
 
-    hide(){
+    hide() {
         this.n.domElement.parentElement.parentElement.style.display = 'none';
         this.m.domElement.parentElement.parentElement.style.display = 'none';
     }
-    show(){
+
+    show() {
         this.n.domElement.parentElement.parentElement.style.display = 'list-item';
         this.m.domElement.parentElement.parentElement.style.display = 'list-item';
     }
@@ -81,10 +95,21 @@ window.onload = function () {
     init();
     var text = new FizzyText();
     var gui = new dat.GUI({autoPlace: false});
-    gui.add(text, 'message');
-    gui.add(text, 'speed', -5, 5);
-    gui.add(text, 'displayOutline');
-    gui.add(text, 'explode');
+
+    /*
+     Create a folder with the available shaders
+     */
+    var file_names = JSON.parse($("#shader-filelist").html()).shader_files;
+    var shader_load_fns = file_names.map(function (name: string) {
+        return function () { load_shader(name); }
+    });
+
+    let shadersFolder = gui.addFolder("Groups");
+    for (var i = 0; i < file_names.length; i++) {
+        shadersFolder.add(shader_load_fns, i.toString()).name(file_names[i]);
+    }
+    shadersFolder.open();
+
 
     var num_terms_controller = gui
         .add(uniforms.num_terms, 'value')
@@ -96,13 +121,15 @@ window.onload = function () {
     let fldr = gui.addFolder("Terms");
     let terms: Array<TermPair> = [];
     let max_terms = 10;
-    for(i = 0; i < max_terms; i++){
+    for (i = 0; i < max_terms; i++) {
         let n = i + 1;
         let pair = new TermPair(fldr);
         pair.m = fldr.add(uniforms.m_vals.value, i.toString()).min(0).max(10).step(1).name('M' + n);
         pair.n = fldr.add(uniforms.n_vals.value, i.toString()).min(0).max(10).step(1).name('N' + n);
         terms.push(pair);
     }
+
+    fldr.open();
 
     let num_terms = 5;
 
@@ -116,8 +143,8 @@ window.onload = function () {
             for (var i = num_terms - 1; i < value; i++) {
                 terms[i].show();
             }
-        }else if (num_terms > value) {
-            for (var i = num_terms - 1; i > (value-1); i--) {
+        } else if (num_terms > value) {
+            for (var i = num_terms - 1; i > (value - 1); i--) {
                 terms[i].hide();
             }
         }
@@ -145,7 +172,7 @@ function init() {
         n_vals: {value: [1, 3, 4, 0, 0, 0, 0, 0, 0, 0]},
         m_vals: {value: [2, 2, 1, 0, 0, 0, 0, 0, 0, 0]},
         r_vals: {value: [0.5, 1.5, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]},
-        a_vals: {value: [2.5, 1.0, 0.0, -1.0, -2.5, 0.0, 0,0, 0.0, 0.0, 0.0]},
+        a_vals: {value: [2.5, 1.0, 0.0, -1.0, -2.5, 0.0, 0, 0, 0.0, 0.0, 0.0]},
         num_terms: {value: 1}
     };
 
