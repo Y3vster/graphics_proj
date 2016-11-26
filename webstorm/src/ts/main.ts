@@ -6,7 +6,6 @@
 /// <reference path="./jquery.d.ts" />
 /// <reference path="./requirejs.d.ts" />
 
-
 /* GLOBAL DECLARATIONS */
 var sidebar_open = false;
 var sidebar_element: HTMLElement;
@@ -60,11 +59,11 @@ class GUIControllerX extends dat.controllers.Controller {
     }
 
     margin_expand() {
-        this.style().marginLeft = '10px';
+        this.style().borderLeftWidth = '10px';
     }
 
     margin_collapse() {
-        this.style().marginLeft = '3px';
+        this.style().borderLeftWidth = '3px';
     }
 }
 
@@ -76,6 +75,137 @@ function applyMixins(derivedCtor: any, baseCtors: any[]) {
     });
 }
 applyMixins(dat.controllers.Controller, [GUIControllerX]);
+
+class vec2 {
+    x: number;
+    y: number;
+}
+
+class polar {
+    r: number;
+    a: number;
+}
+
+class VectorPicker {
+    domElement: HTMLElement;
+    domBox: HTMLElement;
+    domKnob: HTMLElement;
+    polarCallback: ((ra: polar) => void);
+
+    constructor(polarCallback: ((ra: polar)=>void)) {
+
+        this.polarCallback = polarCallback;
+
+        this.domBox = document.createElement('div');
+        this.domBox.className = 'vect-back';
+
+        this.domKnob = document.createElement('div');
+        this.domKnob.className = 'vect-knob';
+
+        this.domElement = document.createElement('div');
+        this.domElement.appendChild(this.domKnob);
+        this.domElement.appendChild(this.domBox);
+
+        var changeColorEvent = (e) => {
+            this.processMouseEvent(e);
+            e.preventDefault();
+        };
+        var removeColorFinish = (e) => {
+            this.processMouseEvent(e);
+            window.removeEventListener('mousemove', changeColorEvent);
+            window.removeEventListener('mouseup', removeColorFinish);
+            e.preventDefault();
+        };
+        var startDrag = (e) => {
+            this.processMouseEvent(e);
+            window.addEventListener('mousemove', changeColorEvent);
+            window.addEventListener('mouseup', removeColorFinish);
+            e.preventDefault();
+        };
+
+        this.domBox.addEventListener('mousedown', startDrag);
+        this.domKnob.addEventListener('mousedown', startDrag);
+    }
+
+    static getBoundedCoord(x_px: number, y_px: number, rect: ClientRect): vec2 {
+        if (x_px > rect.width)
+            x_px = rect.width;
+        else if (x_px < 0.0)
+            x_px = 0.0;
+
+        if (y_px > rect.height)
+            y_px = rect.height;
+        else if (y_px < 0.0)
+            y_px = 0.0;
+
+        return {x: x_px, y: y_px};
+    }
+
+    static getBoundedCoordAbsPosn(x: number, y: number, rect: ClientRect): vec2 {
+        x = x - rect.left;
+        y = y - rect.top;
+        return VectorPicker.getBoundedCoord(x, y, rect);
+    }
+
+    // params: radius and angle
+    setKnobPosnPolar(r, a) {
+
+        var rect = this.domBox.getBoundingClientRect();
+        var x = 0.5 * r * Math.cos(a) + 0.5;
+        x = x * rect.width;
+        var y = 0.5 * r * Math.sin(a) + 0.5;
+        y = 1.0 - y;
+        y = y * rect.height;
+        var xy = VectorPicker.getBoundedCoord(x, y, rect);
+        this.setKnobPosn(xy.x, xy.y);
+
+    }
+
+    setKnobPosn(x, y) {
+        this.domKnob.style.marginLeft = (x - 7) + 'px';
+        this.domKnob.style.marginTop = (y - 7) + 'px';
+    }
+
+    static hypot(xy: vec2): number {
+        if (xy.x == 0.0 && xy.y == 0.0) return 0.0;
+
+        var x, y;
+        if (xy.x > xy.y) {
+            x = Math.abs(xy.x);
+            y = Math.abs(xy.y);
+        } else {
+            y = Math.abs(xy.x);
+            x = Math.abs(xy.y);
+        }
+        // now x > y
+        y = y / (x);
+
+        return x * Math.sqrt(1.0 + y * y);
+    }
+
+    static polarFmWindXY(xy: vec2): polar {
+        var h = VectorPicker.hypot(xy);
+        var ang = Math.atan2(xy.y, xy.x);
+        return {r: h, a: ang};
+    }
+
+    processMouseEvent(e: MouseEvent) {
+        e.preventDefault();
+
+        var rect = this.domBox.getBoundingClientRect();
+        var windXY = VectorPicker.getBoundedCoordAbsPosn(e.clientX, e.clientY, rect);
+
+        this.setKnobPosn(windXY.x, windXY.y);
+
+        var x_norm = ((windXY.x * 2.0) / rect.width) - 1.0;
+        var y_norm = 1.0 - ((windXY.y * 2.0) / rect.height);
+
+        var plr = VectorPicker.polarFmWindXY({x: x_norm, y: y_norm});
+        this.polarCallback(plr);
+    }
+
+
+}
 
 class TermPair {
     fldr: dat.GUI;
@@ -99,15 +229,22 @@ class TermPair {
 }
 
 
-
 // TODO: remove global after done debugging
 var gui;
 
 window.onload = function () {
 
     init();
-    gui = new dat.GUI({autoPlace: false});
 
+    // TODO: VECTOR PICKER TEST
+    var vectPick = new VectorPicker((plr: polar) => {
+        console.log(plr);
+    });
+    $('#sidebar').prepend(vectPick.domElement);
+    vectPick.setKnobPosnPolar(0.5, 0.5);
+
+
+    gui = new dat.GUI({autoPlace: false});
     /*
      Create a folder with the available shaders
      */
@@ -117,19 +254,24 @@ window.onload = function () {
     }
     let shadersFolder = gui.addFolder("Groups");
     var glsl_entries: Array<GLSLEntry> = JSON.parse($("#shader-filelist").html()).shader_files;
-    glsl_entries.forEach(function (x: GLSLEntry) {
+    var shader_buttons: Array<GUIControllerX>;
+    var active_shader_btn: GUIControllerX;
+    shader_buttons = glsl_entries.map(function (x: GLSLEntry) {
+        var this_shader_btn: GUIControllerX;
         var fn = {
             value: function () {
                 load_shader(x.file);
+                active_shader_btn.margin_collapse();
+                active_shader_btn = this_shader_btn;
+                this_shader_btn.margin_expand();
                 canvas_update();
             }
         };
-        shadersFolder.add(fn, 'value').name(x.name);
+        this_shader_btn = <GUIControllerX>shadersFolder.add(fn, 'value').name(x.name);
+        return this_shader_btn;
     });
-
-
+    active_shader_btn = shader_buttons[0];
     shadersFolder.open();
-
 
     var num_terms_controller = gui
         .add(uniforms.num_terms, 'value')
@@ -178,10 +320,17 @@ window.onload = function () {
     gui.add(screenshot_fn, 'fn').name('Take Screenshot');
 
 
+    // COLOR
+    // var clrTest = {val: '#012345'};
+    // var colorControlelr = gui.addColor(clrTest, 'val');
+
+
     // global dat.gui event listening
     $(gui.domElement).on('mousedown mouseup keydown keyup hover', canvas_update);
 
     $('#dat-gui').append(gui.domElement);
+
+
     canvas_update();
 };
 
