@@ -40,13 +40,6 @@
 
 
 
-
-
-
-
-
-
-
 </script>
 
 <script id="fragmentShader" type="x-shader/x-fragment">
@@ -87,85 +80,102 @@
 
 
 
+
+
+
 </script>
-
-
-<a id="settings-button" href="#">
-    <span class="glyphicon glyphicon-cog"></span>
-</a>
 
 <script type="application/json" id="shader-filelist"> {
     "shader_files": [
-        "hex3.glsl",
-        "hex6.glsl",
-        "p4_square_fn.glsl",
-        "p2_gen_paired_fn.glsl",
-        "p1_gen_fn.glsl",
-        "cmm.glsl",
-        "p31m.glsl",
-        "p3m1.glsl",
-        "p6m.glsl",
-        "p4g.glsl",
-        "p4m.glsl",
-        "pmm.glsl",
-        "pmg.glsl",
-        "pgg.glsl",
-        "pm.glsl",
-        "pg.glsl",
-        "cm.glsl"
+        {
+            "name": "hex3",
+            "file": "hex3.glsl"
+        },
+        {
+            "name": "hex6",
+            "file": "hex6.glsl"
+        },
+        {
+            "name": "p4",
+            "file": "p4_square_fn.glsl"
+        },
+        {
+            "name": "p2",
+            "file": "p2_gen_paired_fn.glsl"
+        },
+        {
+            "name": "p1",
+            "file": "p1_gen_fn.glsl"
+        },
+        {
+            "name": "cmm",
+            "file": "cmm.glsl"
+        },
+        {
+            "name": "p31m",
+            "file": "p31m.glsl"
+        },
+        {
+            "name": "p3m1",
+            "file": "p3m1.glsl"
+        },
+        {
+            "name": "p6m",
+            "file": "p6m.glsl"
+        },
+        {
+            "name": "p4g",
+            "file": "p4g.glsl"
+        },
+        {
+            "name": "p4m",
+            "file": "p4m.glsl"
+        },
+        {
+            "name": "pmm",
+            "file": "pmm.glsl"
+        },
+        {
+            "name": "pmg",
+            "file": "pmg.glsl"
+        },
+        {
+            "name": "pgg",
+            "file": "pgg.glsl"
+        },
+        {
+            "name": "pm",
+            "file": "pm.glsl"
+        },
+        {
+            "name": "pg",
+            "file": "pg.glsl"
+        },
+        {
+            "name": "cm",
+            "file": "cm.glsl"
+        }
     ]
 }
 </script>
 
-<div id="sidebar">
-    <span style="height: 40px; display: inline-block;"></span>
-    <div id="dat-gui"></div>
+<div id="content-container">
+    <a id="settings-button" href="#">
+        <span class="glyphicon glyphicon-cog"></span>
+    </a>
+
+    <div id="container"></div>
+
+    <div id="sidebar">
+        <div id="dat-gui"></div>
+    </div>
+
+    <!--For stats.js-->
+    <div id="info"></div>
 </div>
-<div id="container"></div>
-<div id="info"></div>
 
 <!-- script references components above-->
 <script src="ts/main.js"></script>
-
-<!--<nav class="navbar navbar-default">-->
-<!--<div class="container-fluid">-->
-<!--&lt;!&ndash; Brand and toggle get grouped for better mobile display &ndash;&gt;-->
-<!--<div class="navbar-header">-->
-<!--<button type="button" class="navbar-toggle collapsed" data-toggle="collapse"-->
-<!--data-target="#bs-example-navbar-collapse-1" aria-expanded="false">-->
-<!--<span class="sr-only">Toggle navigation</span>-->
-<!--<span class="icon-bar"></span>-->
-<!--<span class="icon-bar"></span>-->
-<!--<span class="icon-bar"></span>-->
-<!--</button>-->
-<!--<a class="navbar-brand" href="#">Wallpaperizer 3000</a>-->
-<!--</div>-->
-
-<!--&lt;!&ndash; Collect the nav links, forms, and other content for toggling &ndash;&gt;-->
-<!--<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">-->
-<!--<ul class="nav navbar-nav">-->
-<!--<li class="dropdown">-->
-<!--<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"-->
-<!--aria-expanded="false">Group <span class="caret"></span></a>-->
-<!--<ul class="dropdown-menu">-->
-<!--<li><a href="#" class="btn_group" data-file="p1_gen_fn.glsl">P1</a></li>-->
-<!--<li><a href="#" class="btn_group" data-file="hex3.glsl">HEX3</a></li>-->
-<!--<li><a href="#" class="btn_group">HEX6</a></li>-->
-<!--</ul>-->
-<!--</li>-->
-<!--<li class="dropdown">-->
-<!--<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"-->
-<!--aria-expanded="false">Color Wheel <span class="caret"></span></a>-->
-<!--<ul class="dropdown-menu">-->
-<!--<li><a href="#">Wheel1</a></li>-->
-<!--<li><a href="#">Wheel2</a></li>-->
-<!--<li><a href="#">Wheel3</a></li>-->
-<!--</ul>-->
-<!--</li>-->
-<!--</ul>-->
-<!--</div>&lt;!&ndash; /.navbar-collapse &ndash;&gt;-->
-<!--</div>&lt;!&ndash; /.container-fluid &ndash;&gt;-->
-<!--</nav>-->
 
 
 <!--&lt;!&ndash; Google Analytics: change UA-XXXXX-X to be your site's ID. &ndash;&gt;-->
