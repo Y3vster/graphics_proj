@@ -207,7 +207,7 @@ class VectorPicker {
 
 }
 
-class TermPair {
+class TermSet {
     fldr: dat.GUI;
 
     constructor(folder: dat.GUI) {
@@ -216,6 +216,8 @@ class TermPair {
 
     n: GUIControllerX;
     m: GUIControllerX;
+    r: GUIControllerX;
+    a: GUIControllerX;
 
     hideMe() {
         this.n.hideMe();
@@ -229,9 +231,6 @@ class TermPair {
 }
 
 
-// TODO: remove global after done debugging
-var gui;
-
 window.onload = function () {
 
     init();
@@ -244,7 +243,7 @@ window.onload = function () {
     vectPick.setKnobPosnPolar(0.5, 0.5);
 
 
-    gui = new dat.GUI({autoPlace: false});
+    var gui = new dat.GUI({autoPlace: false});
     /*
      Create a folder with the available shaders
      */
@@ -281,16 +280,20 @@ window.onload = function () {
         .name("# Terms");
 
     let fldr = gui.addFolder("Terms");
-    let terms: Array<TermPair> = [];
+    let terms: Array<TermSet> = [];
     let max_terms = 10;
     for (var i = 0; i < max_terms; i++) {
         let n = i + 1;
-        let pair = new TermPair(fldr);
-        pair.m = <GUIControllerX>fldr.add(uniforms.m_vals.value, i.toString()).min(0).max(10).step(1).name('M' + n);
-        pair.m.onChange(canvas_update);
-        pair.n = <GUIControllerX>fldr.add(uniforms.n_vals.value, i.toString()).min(0).max(10).step(1).name('N' + n);
-        pair.n.onChange(canvas_update);
-        terms.push(pair);
+        let term_set = new TermSet(fldr);
+        term_set.m = <GUIControllerX>fldr.add(uniforms.m_vals.value, i.toString()).min(0).max(10).step(1).name('M' + n);
+        term_set.n = <GUIControllerX>fldr.add(uniforms.n_vals.value, i.toString()).min(0).max(10).step(1).name('N' + n);
+        term_set.r = <GUIControllerX>fldr.add(uniforms.r_vals.value, i.toString()).min(0).max(1.0).step(0.05).name('R' + n);
+        term_set.a = <GUIControllerX>fldr.add(uniforms.a_vals.value, i.toString()).min(0).max(2.0 * Math.PI).step(0.05).name('A' + n);
+        term_set.m.onChange(canvas_update);
+        term_set.n.onChange(canvas_update);
+        term_set.r.onChange(canvas_update);
+        term_set.a.onChange(canvas_update);
+        terms.push(term_set);
     }
     fldr.open();
 
@@ -342,7 +345,7 @@ function init() {
         resolution: {value: new THREE.Vector2()},
         n_vals: {value: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]},
         m_vals: {value: [2, 2, 1, 0, 0, 0, 0, 0, 0, 0]},
-        r_vals: {value: [0.5, 1.5, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]},
+        r_vals: {value: [0.5, 0.9, 1.0, 0.2, 0.4, 0.0, 0.0, 0.0, 0.0, 0.0]},
         a_vals: {value: [2.5, 1.0, 0.0, -1.0, -2.5, 0.0, 0, 0, 0.0, 0.0, 0.0]},
         num_terms: {value: DEFAULT_NUM_TERMS}
     };
