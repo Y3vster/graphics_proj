@@ -18,6 +18,7 @@ var material: THREE.ShaderMaterial, geometry;
 var uniforms;
 
 
+// Loads the shader files
 function load_shader(name: string) {
     $.ajax({
         url: 'glsl/' + name,
@@ -30,6 +31,7 @@ function load_shader(name: string) {
 }
 
 
+// hides the sidebar
 (function () {
     sidebar_element = document.getElementById('sidebar');
     $('#settings-button').click(
@@ -45,6 +47,8 @@ function load_shader(name: string) {
 })();
 
 
+// Add functionality to the gui controller
+// Makes it hideable and highlightable
 class GUIControllerX extends dat.controllers.Controller {
     style(): CSSStyleDeclaration {
         return this.domElement.parentElement.parentElement.style;
@@ -66,7 +70,6 @@ class GUIControllerX extends dat.controllers.Controller {
         this.style().borderLeftWidth = '3px';
     }
 }
-
 function applyMixins(derivedCtor: any, baseCtors: any[]) {
     baseCtors.forEach(baseCtor => {
         Object.getOwnPropertyNames(baseCtor.prototype).forEach(name => {
@@ -75,6 +78,7 @@ function applyMixins(derivedCtor: any, baseCtors: any[]) {
     });
 }
 applyMixins(dat.controllers.Controller, [GUIControllerX]);
+
 
 class vec2 {
     x: number;
@@ -86,26 +90,30 @@ class polar {
     a: number;
 }
 
+// Component to modify a vector
 class VectorPicker {
-    domElement: HTMLElement;
-    domBox: HTMLElement;
+    domElement: HTMLElement;    // main container
+    domBack: HTMLElement;        // the background box
     domKnob: HTMLElement;
-    polarCallback: ((ra: polar) => void);
+    polarCallback: ((ra: polar) => void);   // callback for changes
 
+    // constructor accepts a callback for notifying about changes
     constructor(polarCallback: ((ra: polar)=>void)) {
 
         this.polarCallback = polarCallback;
 
-        this.domBox = document.createElement('div');
-        this.domBox.className = 'vect-back';
+        this.domBack = document.createElement('div');
+        this.domBack.className = 'vect-pick-back';
 
         this.domKnob = document.createElement('div');
         this.domKnob.className = 'vect-knob';
 
         this.domElement = document.createElement('div');
+        this.domElement.style.display = 'inline-block';
         this.domElement.appendChild(this.domKnob);
-        this.domElement.appendChild(this.domBox);
+        this.domElement.appendChild(this.domBack);
 
+        // event processing for mouse clicks and moves
         var changeColorEvent = (e) => {
             this.processMouseEvent(e);
             e.preventDefault();
@@ -123,10 +131,11 @@ class VectorPicker {
             e.preventDefault();
         };
 
-        this.domBox.addEventListener('mousedown', startDrag);
+        this.domBack.addEventListener('mousedown', startDrag);
         this.domKnob.addEventListener('mousedown', startDrag);
     }
 
+    // returns {x, y} that is bounded within  the rect
     static getBoundedCoord(x_px: number, y_px: number, rect: ClientRect): vec2 {
         if (x_px > rect.width)
             x_px = rect.width;
@@ -141,16 +150,17 @@ class VectorPicker {
         return {x: x_px, y: y_px};
     }
 
-    static getBoundedCoordAbsPosn(x: number, y: number, rect: ClientRect): vec2 {
+    // accepts a mouse {x, y} and returns a bounded relative {x, y}
+    static getCoordFromMouse(x: number, y: number, rect: ClientRect): vec2 {
         x = x - rect.left;
         y = y - rect.top;
         return VectorPicker.getBoundedCoord(x, y, rect);
     }
 
+    // Sets the draggable knob to some polar coordinate
     // params: radius and angle
     setKnobPosnPolar(r, a) {
-
-        var rect = this.domBox.getBoundingClientRect();
+        var rect = this.domBack.getBoundingClientRect();
         var x = 0.5 * r * Math.cos(a) + 0.5;
         x = x * rect.width;
         var y = 0.5 * r * Math.sin(a) + 0.5;
@@ -158,9 +168,9 @@ class VectorPicker {
         y = y * rect.height;
         var xy = VectorPicker.getBoundedCoord(x, y, rect);
         this.setKnobPosn(xy.x, xy.y);
-
     }
 
+    // Sets the draggable knob to the relative container {x, y}
     setKnobPosn(x, y) {
         this.domKnob.style.marginLeft = (x - 7) + 'px';
         this.domKnob.style.marginTop = (y - 7) + 'px';
@@ -168,19 +178,15 @@ class VectorPicker {
 
     static hypot(xy: vec2): number {
         if (xy.x == 0.0 && xy.y == 0.0) return 0.0;
-
-        var x, y;
-        if (xy.x > xy.y) {
-            x = Math.abs(xy.x);
-            y = Math.abs(xy.y);
+        var x = Math.abs(xy.x);
+        var y = Math.abs(xy.y);
+        if (x > y) {
+            y = y / x;
+            return x * Math.sqrt(1.0 + y * y);
         } else {
-            y = Math.abs(xy.x);
-            x = Math.abs(xy.y);
+            x = x / y;
+            return y * Math.sqrt(1.0 + x * x);
         }
-        // now x > y
-        y = y / (x);
-
-        return x * Math.sqrt(1.0 + y * y);
     }
 
     static polarFmWindXY(xy: vec2): polar {
@@ -192,8 +198,8 @@ class VectorPicker {
     processMouseEvent(e: MouseEvent) {
         e.preventDefault();
 
-        var rect = this.domBox.getBoundingClientRect();
-        var windXY = VectorPicker.getBoundedCoordAbsPosn(e.clientX, e.clientY, rect);
+        var rect = this.domBack.getBoundingClientRect();
+        var windXY = VectorPicker.getCoordFromMouse(e.clientX, e.clientY, rect);
 
         this.setKnobPosn(windXY.x, windXY.y);
 
@@ -203,8 +209,6 @@ class VectorPicker {
         var plr = VectorPicker.polarFmWindXY({x: x_norm, y: y_norm});
         this.polarCallback(plr);
     }
-
-
 }
 
 class TermSet {
@@ -219,31 +223,52 @@ class TermSet {
     r: GUIControllerX;
     a: GUIControllerX;
 
+    props = ['n', 'm', 'r', 'a'];
+
     hideMe() {
-        this.n.hideMe();
-        this.m.hideMe();
+        this.props.forEach(x => this[x].hideMe());
     }
 
     showMe() {
-        this.n.showMe();
-        this.m.showMe();
+        this.props.forEach(x => this[x].showMe());
     }
 }
+
+var screenshooter = {
+    shoot: function () {
+        var wind = window.open();
+        wind.document.write('<img src="' + renderer.domElement.toDataURL("image/png") + '" style="width: 100%"/>');
+    }
+};
 
 
 window.onload = function () {
 
-    init();
+    var glsl_entries: Array<GLSLEntry> = JSON.parse($("#shader-filelist").html()).shader_files;
+
+    init(glsl_entries[2].file);
 
     // TODO: VECTOR PICKER TEST
     var vectPick = new VectorPicker((plr: polar) => {
-        console.log(plr);
+        // console.log(plr);
+        uniforms.r_vals.value[0] = plr.r;
+        uniforms.a_vals.value[0] = plr.a;
+        canvas_update();
     });
-    $('#sidebar').prepend(vectPick.domElement);
+    var mnPick = new VectorPicker((plr: polar) => {
+        // console.log(plr);
+        uniforms.r_vals.value[1] = plr.r;
+        uniforms.a_vals.value[1] = plr.a;
+        canvas_update();
+    });
+    $('#test-pickers').append(vectPick.domElement);
+    $('#test-pickers').append(mnPick.domElement);
     vectPick.setKnobPosnPolar(0.5, 0.5);
+    mnPick.setKnobPosnPolar(-0.5, 0.5);
 
 
     var gui = new dat.GUI({autoPlace: false});
+    gui.add(screenshooter, 'shoot').name('Take Screenshot');
     /*
      Create a folder with the available shaders
      */
@@ -252,7 +277,6 @@ window.onload = function () {
         file: string;
     }
     let shadersFolder = gui.addFolder("Groups");
-    var glsl_entries: Array<GLSLEntry> = JSON.parse($("#shader-filelist").html()).shader_files;
     var shader_buttons: Array<GUIControllerX>;
     var active_shader_btn: GUIControllerX;
     shader_buttons = glsl_entries.map(function (x: GLSLEntry) {
@@ -314,15 +338,6 @@ window.onload = function () {
     num_terms_controller.onChange(num_terms_change_fn);
     num_terms_change_fn(DEFAULT_NUM_TERMS);
 
-    var screenshot_fn = {
-        fn: function () {
-            var wind = window.open();
-            wind.document.write('<img src="' + renderer.domElement.toDataURL("image/png") + '" style="width: 100%"/>');
-        }
-    };
-    gui.add(screenshot_fn, 'fn').name('Take Screenshot');
-
-
     // COLOR
     // var clrTest = {val: '#012345'};
     // var colorControlelr = gui.addColor(clrTest, 'val');
@@ -333,12 +348,11 @@ window.onload = function () {
 
     $('#dat-gui').append(gui.domElement);
 
-
     canvas_update();
 };
 
 
-function init() {
+function init(shader_file: string) {
 
     uniforms = {
         time: {value: 1.0},
@@ -364,12 +378,19 @@ function init() {
     geometry = new THREE.PlaneBufferGeometry(2, 2);
 
     // MATERIAL
-    var origVertShader = document.getElementById('vertexShader').textContent;
-    var origFragShader = document.getElementById('fragmentShader').textContent;
+    var shader_text;
+    $.ajax({
+        url: 'glsl/' + shader_file,
+        dataType: 'text',
+        success: function (data) {
+            shader_text = data;
+        },
+        async: false
+    });
     material = new THREE.ShaderMaterial({
         uniforms: uniforms,
-        vertexShader: origVertShader,
-        fragmentShader: origFragShader
+        vertexShader: document.getElementById('vertexShader').textContent,
+        fragmentShader: shader_text
     });
 
     // MESH FROM GEOMETRY & MATERIAL
@@ -396,32 +417,13 @@ function onWindowResize(event) {
 }
 
 
-// Updates the canvas
 function canvas_update() {
     requestAnimationFrame(render);
 }
 
 function render() {
-    uniforms.time.value += 0.05;
     renderer.render(scene, camera);
 }
-
-/*** ADDING SCREEN SHOT ABILITY ***/
-$(function () {
-    window.addEventListener("keyup", function (e) {
-        //Listen to 'P' key
-        if (e.which !== 80) return;
-        try {
-            console.log("Image taken");
-        }
-        catch (e) {
-            console.log("Browser does not support taking screenshot of 3d context");
-            return;
-        }
-
-    });
-});
-
 
 /*
  HOW TO USE RAW SHADER WITH NO GEOM

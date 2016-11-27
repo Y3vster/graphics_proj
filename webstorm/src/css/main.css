@@ -72,7 +72,7 @@ body {
     z-index: 1;
     /*margin-left: 43px;*/
     /*margin-top: 32.2157px;*/
-    background-color: #4d749b;
+    background-color: #41c8ff;
 }
 
 .vect-back {
@@ -83,6 +83,21 @@ body {
     display: inline-block;
     cursor: pointer;
     background: -webkit-linear-gradient(left, rgb(255, 255, 255) 0%, rgb(0, 127, 255) 100%);
+}
+
+.vect-pick-back {
+    width: 102px;
+    height: 102px;
+    border: 1px solid #555555;
+    display: inline-block;
+    cursor: pointer;
+    background-color: #1a1a1a;
+    background-image:
+        linear-gradient(#a8a8a8 1px, transparent 1px),
+        linear-gradient(90deg, #a8a8a8 1px, transparent 1px),
+        radial-gradient(circle 50px at 50px 50px, #a8a8a8 2px, transparent 2px, transparent 48px, #a8a8a8 48px, #a8a8a8 49px, transparent);
+    background-size: 100px 100px, 100px 100px, 100px 100px;
+    background-position: 50px 50px, 50px 50px, 0px 0px;
 }
 
 html {

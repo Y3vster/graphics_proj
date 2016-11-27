@@ -88,7 +88,7 @@ vec2 complex_multiplication(vec2 s, vec2 t) {
 }
 
 vec2 hex3_fn() {
-    vec2 ans = vec2(0, 0);
+    vec2 ans = vec2(0.0, 0.0);
     for (int k = 0; k < 10; k++) {
         if (k == num_terms) break;	// workaround to loops being limited to constant expressions
         float m = float(m_vals[k]);

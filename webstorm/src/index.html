@@ -12,7 +12,6 @@
 
     <link rel="stylesheet" href="css/normalize.css">
     <link rel="stylesheet" href="css/bootstrap.css">
-    <link rel="stylesheet" href="css/dat.gui.css">
     <link rel="stylesheet" href="css/main.css">
     <script src="js/vendor/modernizr-2.8.3.min.js"></script>
 
@@ -37,6 +36,9 @@
 			void main()	{
 				gl_Position = vec4( position, 1.0 );
 			}
+
+
+
 
 
 
@@ -89,78 +91,30 @@
 
 
 
+
+
+
 </script>
 
 <script type="application/json" id="shader-filelist"> {
     "shader_files": [
-        {
-            "name": "hex3",
-            "file": "hex3.glsl"
-        },
-        {
-            "name": "hex6",
-            "file": "hex6.glsl"
-        },
-        {
-            "name": "p4",
-            "file": "p4_square_fn.glsl"
-        },
-        {
-            "name": "p2",
-            "file": "p2_gen_paired_fn.glsl"
-        },
-        {
-            "name": "p1",
-            "file": "p1_gen_fn.glsl"
-        },
-        {
-            "name": "cmm",
-            "file": "cmm.glsl"
-        },
-        {
-            "name": "p31m",
-            "file": "p31m.glsl"
-        },
-        {
-            "name": "p3m1",
-            "file": "p3m1.glsl"
-        },
-        {
-            "name": "p6m",
-            "file": "p6m.glsl"
-        },
-        {
-            "name": "p4g",
-            "file": "p4g.glsl"
-        },
-        {
-            "name": "p4m",
-            "file": "p4m.glsl"
-        },
-        {
-            "name": "pmm",
-            "file": "pmm.glsl"
-        },
-        {
-            "name": "pmg",
-            "file": "pmg.glsl"
-        },
-        {
-            "name": "pgg",
-            "file": "pgg.glsl"
-        },
-        {
-            "name": "pm",
-            "file": "pm.glsl"
-        },
-        {
-            "name": "pg",
-            "file": "pg.glsl"
-        },
-        {
-            "name": "cm",
-            "file": "cm.glsl"
-        }
+        { "name": "cm", "file": "cm.glsl" },
+        { "name": "cmm", "file": "cmm.glsl" },
+        { "name": "hex3", "file": "hex3.glsl" },
+        { "name": "hex6", "file": "hex6.glsl" },
+        { "name": "p1", "file": "p1_gen_fn.glsl" },
+        { "name": "p2", "file": "p2_gen_paired_fn.glsl" },
+        { "name": "p31m", "file": "p31m.glsl" },
+        { "name": "p3m1", "file": "p3m1.glsl" },
+        { "name": "p4", "file": "p4_square_fn.glsl" },
+        { "name": "p4g", "file": "p4g.glsl" },
+        { "name": "p4m", "file": "p4m.glsl" },
+        { "name": "p6m", "file": "p6m.glsl" },
+        { "name": "pg", "file": "pg.glsl" },
+        { "name": "pgg", "file": "pgg.glsl" },
+        { "name": "pm", "file": "pm.glsl" },
+        { "name": "pmg", "file": "pmg.glsl" },
+        { "name": "pmm", "file": "pmm.glsl" }
     ]
 }
 </script>
@@ -173,8 +127,7 @@
     <div id="container"></div>
 
     <div id="sidebar">
-        <!--<div class="vect-knob"></div>-->
-        <!--<div class="vect-back"></div>-->
+        <div id="test-pickers" style=" margin-top: 40px; text-align: center; "></div>
         <div id="dat-gui"></div>
     </div>
 
