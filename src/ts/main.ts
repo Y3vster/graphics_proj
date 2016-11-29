@@ -11,6 +11,7 @@ var sidebar_open = false;
 var sidebar_element: HTMLElement;
 var SIDEBAR_WIDTH = 240;
 var DEFAULT_NUM_TERMS = 3;
+var DEFAULT_NUM_COLORS = 5;
 
 var container;
 var camera, scene, renderer;
@@ -246,7 +247,7 @@ window.onload = function () {
 
     var glsl_entries: Array<GLSLEntry> = JSON.parse($("#shader-filelist").html()).shader_files;
 
-    init(glsl_entries[2].file);
+    init(glsl_entries[1].file);
 
     // TODO: VECTOR PICKER TEST
     var vectPick = new VectorPicker((plr: polar) => {
@@ -295,6 +296,15 @@ window.onload = function () {
     });
     active_shader_btn = shader_buttons[0];
     shadersFolder.open();
+
+    var num_colors_controller = gui
+        .add(uniforms.num_colors, 'value')
+        .min(1)
+        .max(20)
+        .step(1)
+        .name("# Colors");
+
+    num_colors_controller.onChange(canvas_update);
 
     var num_terms_controller = gui
         .add(uniforms.num_terms, 'value')
@@ -361,7 +371,8 @@ function init(shader_file: string) {
         m_vals: {value: [2, 2, 1, 0, 0, 0, 0, 0, 0, 0]},
         r_vals: {value: [0.5, 0.9, 1.0, 0.2, 0.4, 0.0, 0.0, 0.0, 0.0, 0.0]},
         a_vals: {value: [2.5, 1.0, 0.0, -1.0, -2.5, 0.0, 0, 0, 0.0, 0.0, 0.0]},
-        num_terms: {value: DEFAULT_NUM_TERMS}
+        num_terms: {value: DEFAULT_NUM_TERMS},
+        num_colors: {value: DEFAULT_NUM_COLORS}
     };
 
     // RENDERER THAT PRESERVES THE DRAWING BUFFER
