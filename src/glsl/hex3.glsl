@@ -1,10 +1,10 @@
 #extension GL_OES_standard_derivatives : enable
 
 #define GRID_SPACING vec2(1.0)
-#define DC_SATUR 0.7
+#define DC_SATUR 0.95
 #define DC_GRID_STR 0.1
-#define DC_MAG_STR 0.2
-#define DC_LINE_PWR 5.0
+#define DC_MAG_STR 0.8
+#define DC_LINE_PWR 16.0
 
 #ifdef GL_ES
 precision mediump float;
@@ -51,16 +51,31 @@ vec4 domainColoring (vec2 z, vec2 gridSpacing, float saturation, float gridStren
   imbrt *= imbrt;
 
   float grid = 1.0 - (1.0 - rebrt) * (1.0 - imbrt);
-  grid = pow(abs(grid), linePower);
+  grid = pow(min(abs(grid), 1.0), linePower);
+  grid *= gridStrength;
 
   float circ = (fract(log2(cmod)) - 0.5) * 2.0;
   circ = pow(abs(circ), linePower);
 
   circ *= magStrength;
 
-  vec3 rgb = hsv2rgb(vec3(carg * 0.5 / M_PI, saturation, 0.5 + 0.5 * saturation - gridStrength * grid));
+//  carg *= (1.0 + grid);
+
+  vec3 rgb = hsv2rgb(vec3(carg * 0.5 / M_PI, saturation, 0.5 + 0.5 * saturation));
+
+  // HOW THE FUNC ABOVE WAS BEFORE:
+//  vec3 rgb = hsv2rgb(vec3(carg * 0.5 / M_PI, saturation, 0.5 + 0.5 * saturation - grid));
+
+  //   instead of the grid being black, it will invert the color
+  float grid_frac = min(grid, 1.0);
+  float orig_frac = 1.0 - grid_frac;
+  vec3 rgb_inverse = vec3(1.0, 1.0, 1.0) - rgb;
+  rgb = rgb * orig_frac + rgb_inverse * grid_frac;
+
+  // adds the magnitude lines
   rgb *= (1.0 - circ);
   rgb += circ * vec3(1.0);
+
   return vec4(rgb, 1.0);
 }
 
