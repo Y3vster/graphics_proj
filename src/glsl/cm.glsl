@@ -1,9 +1,5 @@
 #extension GL_OES_standard_derivatives : enable
 
-#define DC_SATUR 0.7
-#define DC_MAG_STR 0.2
-#define DC_LINE_PWR 5.0
-
 #ifdef GL_ES
 precision mediump float;
 #endif
@@ -22,6 +18,9 @@ uniform float r_vals[10];
 uniform float a_vals[10];
 uniform int num_terms;
 uniform int num_colors;
+uniform float saturation;
+uniform float magnitude_strength;
+uniform float line_power;
 
 vec2 posn;
 
@@ -41,23 +40,22 @@ float hypot (vec2 z) {
   return (z.x == 0.0 && z.y == 0.0) ? 0.0 : x * sqrt(1.0 + t * t);
 }
 
-vec4 domainColoring (vec2 z, float saturation, float magStrength, float linePower) {
+vec4 domainColoring (vec2 z) {
   float carg = atan(z.y, z.x);
   float cmod = hypot(z);
 
   float circ = (fract(log2(cmod)) - 0.5) * 2.0;
-  circ = pow(abs(circ), linePower);
+  circ = pow(abs(circ), line_power);
 
-  circ *= magStrength;
+  circ *= magnitude_strength;
 
-  float colorAdj = 2.0 * M_PI / float(num_colors);
-  carg = mod(floor(carg / colorAdj) * colorAdj, 2.0 * M_PI);
+  float color_adj = 2.0 * M_PI / float(num_colors);
+  carg = mod(floor(carg / color_adj) * color_adj, 2.0 * M_PI);
   vec3 rgb = hsv2rgb(vec3(carg, saturation, 0.5 + 0.5 * saturation));
   rgb *= (1.0 - circ);
   rgb += circ * vec3(1.0);
   return vec4(rgb, 1.0);
 }
-
 
 float xrhombic(){
     return M_PI * (posn.y / KRHOMBIC + posn.x / LRHOMBIC);
@@ -99,7 +97,6 @@ vec2 cm_fn() {
     return ans;
 }
 
-
 void main () {
 	posn = gl_FragCoord.xy / resolution.xy;
 	posn = posn * 2.0 - 1.0;
@@ -108,5 +105,5 @@ void main () {
     /* complex */
     vec2 z = cm_fn();
 
-    gl_FragColor = domainColoring(z, DC_SATUR, DC_MAG_STR, DC_LINE_PWR);
+    gl_FragColor = domainColoring(z);
 }

@@ -16,6 +16,9 @@ var sidebar_element;
 var SIDEBAR_WIDTH = 240;
 var DEFAULT_NUM_TERMS = 3;
 var DEFAULT_NUM_COLORS = 5;
+var DEFAULT_SATURATION = 0.7;
+var DEFAULT_MAG_STRENGTH = 0.2;
+var DEFAULT_LINE_POWER = 5.0;
 var container;
 var camera, scene, renderer;
 var material, geometry;
@@ -257,13 +260,6 @@ window.onload = function () {
     });
     active_shader_btn = shader_buttons[0];
     shadersFolder.open();
-    var num_colors_controller = gui
-        .add(uniforms.num_colors, 'value')
-        .min(1)
-        .max(20)
-        .step(1)
-        .name("# Colors");
-    num_colors_controller.onChange(canvas_update);
     var num_terms_controller = gui
         .add(uniforms.num_terms, 'value')
         .min(1)
@@ -307,6 +303,34 @@ window.onload = function () {
     // COLOR
     // var clrTest = {val: '#012345'};
     // var colorControlelr = gui.addColor(clrTest, 'val');
+    var num_colors_controller = gui
+        .add(uniforms.num_colors, 'value')
+        .min(1)
+        .max(20)
+        .step(1)
+        .name("# Colors");
+    num_colors_controller.onChange(canvas_update);
+    var saturation_controller = gui
+        .add(uniforms.saturation, 'value')
+        .min(0.0)
+        .max(1.0)
+        .step(0.1)
+        .name("Saturation");
+    saturation_controller.onChange(canvas_update);
+    var magnitude_strength_controller = gui
+        .add(uniforms.magnitude_strength, 'value')
+        .min(0.0)
+        .max(1.0)
+        .step(0.1)
+        .name("Magnitude Strength");
+    magnitude_strength_controller.onChange(canvas_update);
+    var line_power_controller = gui
+        .add(uniforms.line_power, 'value')
+        .min(0.0)
+        .max(10.0)
+        .step(0.5)
+        .name("Line Power");
+    line_power_controller.onChange(canvas_update);
     // global dat.gui event listening
     $(gui.domElement).on('mousedown mouseup keydown keyup hover', canvas_update);
     $('#dat-gui').append(gui.domElement);
@@ -321,7 +345,10 @@ function init(shader_file) {
         r_vals: { value: [0.5, 0.9, 1.0, 0.2, 0.4, 0.0, 0.0, 0.0, 0.0, 0.0] },
         a_vals: { value: [2.5, 1.0, 0.0, -1.0, -2.5, 0.0, 0, 0, 0.0, 0.0, 0.0] },
         num_terms: { value: DEFAULT_NUM_TERMS },
-        num_colors: { value: DEFAULT_NUM_COLORS }
+        num_colors: { value: DEFAULT_NUM_COLORS },
+        saturation: { value: DEFAULT_SATURATION },
+        magnitude_strength: { value: DEFAULT_MAG_STRENGTH },
+        line_power: { value: DEFAULT_LINE_POWER }
     };
     // RENDERER THAT PRESERVES THE DRAWING BUFFER
     renderer = new THREE.WebGLRenderer({ preserveDrawingBuffer: true });
