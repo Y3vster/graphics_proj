@@ -1,0 +1,24 @@
+{
+    "compilerOptions": {
+        "module": "system",
+        "target" : "es5",
+        "noImplicitAny": false,
+        "removeComments": false,
+        "preserveConstEnums": true,
+        "outFile": "src/ts/main.js",
+        "sourceMap": true
+    },
+    "files":[
+        "src/ts/primitives.ts",
+        "src/ts/my_components.ts",
+        "src/ts/main.ts",
+        "src/ts/dat_extension"
+    ]
+//    "include": [
+//        "src/**/*"
+//    ],
+//    "exclude": [
+//        "node_modules",
+//        "**/*.spec.ts"
+//    ]
+}

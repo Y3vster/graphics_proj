@@ -22,7 +22,8 @@
     "jshint-stylish": "^2.2.1",
     "mocha": "^2.2.4",
     "normalize.css": "3.0.3",
-    "run-sequence": "^1.2.2"
+    "run-sequence": "^1.2.2",
+    "systemjs": "^0.19.41"
   },
   "engines": {
     "node": ">=0.10.0"

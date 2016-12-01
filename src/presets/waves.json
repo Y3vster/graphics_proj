@@ -1,0 +1,61 @@
+{
+    "time": {
+        "value": 1
+    },
+    "resolution": {
+        "value": {
+            "x": 2522,
+            "y": 1818
+        }
+    },
+    "n_vals": {
+        "value": [ 2, 1, 0, 0, 0, 1, 0, 0, 0, 0 ]
+    },
+    "m_vals": {
+        "value": [ 1, 1, 1, 0, 0, 1, 0, 0, 0, 0 ]
+    },
+    "r_vals": {
+        "value": [
+            0.5,
+            0.9,
+            1,
+            0.2,
+            0.4,
+            0.1,
+            0,
+            0,
+            0,
+            0
+        ]
+    },
+    "a_vals": {
+        "value": [
+            2.5,
+            1,
+            2.25,
+            -1,
+            -2.5,
+            2.2,
+            0,
+            0,
+            0,
+            0,
+            0
+        ]
+    },
+    "num_terms": {
+        "value": 8
+    },
+    "num_colors": {
+        "value": 12
+    },
+    "saturation": {
+        "value": 0.7000000000000001
+    },
+    "magnitude_strength": {
+        "value": 1
+    },
+    "line_power": {
+        "value": 10
+    }
+}
