@@ -335,7 +335,7 @@ System.register("main", ["my_components"], function(exports_3, context_3) {
     "use strict";
     var __moduleName = context_3 && context_3.id;
     var my_components_1;
-    var sidebar_open, sidebar_element, SIDEBAR_WIDTH, DEFAULT_NUM_TERMS, DEFAULT_NUM_COLORS, DEFAULT_SATURATION, DEFAULT_MAG_STRENGTH, DEFAULT_LINE_POWER, container, camera, scene, renderer, material, geometry, uniforms, screenshooter;
+    var sidebar_open, sidebar_element, SIDEBAR_WIDTH, DEFAULT_NUM_TERMS, DEFAULT_NUM_COLORS, DEFAULT_SATURATION, DEFAULT_MAG_STRENGTH, DEFAULT_LINE_POWER, DEFAULT_SCALE, container, camera, scene, renderer, material, geometry, uniforms, screenshooter;
     // Loads the shader files
     function load_shader(name) {
         $.ajax({
@@ -359,7 +359,8 @@ System.register("main", ["my_components"], function(exports_3, context_3) {
             num_colors: { value: DEFAULT_NUM_COLORS },
             saturation: { value: DEFAULT_SATURATION },
             magnitude_strength: { value: DEFAULT_MAG_STRENGTH },
-            line_power: { value: DEFAULT_LINE_POWER }
+            line_power: { value: DEFAULT_LINE_POWER },
+            scale: { value: DEFAULT_SCALE }
         };
         // RENDERER THAT PRESERVES THE DRAWING BUFFER
         renderer = new THREE.WebGLRenderer({ preserveDrawingBuffer: true });
@@ -425,6 +426,7 @@ System.register("main", ["my_components"], function(exports_3, context_3) {
             DEFAULT_SATURATION = 0.8;
             DEFAULT_MAG_STRENGTH = 0.5;
             DEFAULT_LINE_POWER = 25.0;
+            DEFAULT_SCALE = 1.0;
             // hides the sidebar
             (function () {
                 sidebar_element = document.getElementById('sidebar');
@@ -470,6 +472,11 @@ System.register("main", ["my_components"], function(exports_3, context_3) {
                     return GLSLEntry;
                 }());
                 var dispSettings = gui.addFolder('Display Settings');
+                dispSettings.add(uniforms.scale, 'value')
+                    .min(0.25)
+                    .max(5.0)
+                    .name("Scale")
+                    .onChange(canvas_update);
                 dispSettings.add(uniforms.num_colors, 'value')
                     .min(1)
                     .max(128)

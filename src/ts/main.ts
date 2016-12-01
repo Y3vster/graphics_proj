@@ -23,6 +23,7 @@ var DEFAULT_NUM_COLORS = 64;
 var DEFAULT_SATURATION = 0.8;
 var DEFAULT_MAG_STRENGTH = 0.5;
 var DEFAULT_LINE_POWER = 25.0;
+var DEFAULT_SCALE = 1.0;
 
 var container;
 var camera, scene, renderer;
@@ -99,6 +100,11 @@ $(function () {
     }
 
     var dispSettings = gui.addFolder('Display Settings');
+    dispSettings.add(uniforms.scale, 'value')
+        .min(0.25)
+        .max(5.0)
+        .name("Scale")
+        .onChange(canvas_update);
     dispSettings.add(uniforms.num_colors, 'value')
         .min(1)
         .max(128)
@@ -227,7 +233,8 @@ function init(shader_file: string) {
         num_colors: {value: DEFAULT_NUM_COLORS},
         saturation: {value: DEFAULT_SATURATION},
         magnitude_strength: {value: DEFAULT_MAG_STRENGTH},
-        line_power: {value: DEFAULT_LINE_POWER}
+        line_power: {value: DEFAULT_LINE_POWER},
+        scale: {value: DEFAULT_SCALE}
     };
 
     // RENDERER THAT PRESERVES THE DRAWING BUFFER
