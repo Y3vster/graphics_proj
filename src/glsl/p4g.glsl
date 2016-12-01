@@ -84,16 +84,16 @@ vec2 p4g_fn() {
         if (k == num_terms) break;	// workaround to loops being limited to constant expressions
         float m = float(m_vals[k]);
         float n = float(n_vals[k]);
-        float g = pow(-1.0, n + m);
+        float sign = mod(n + m, 2.0) == 0.0 ? 1.0 : -1.0;
 
-        vec2 p1 =     unit_complex_fm_angle( n * xsquare() + m * ysquare());
-        vec2 p2 =     unit_complex_fm_angle(-m * xsquare() + n * ysquare());
-        vec2 p3 =     unit_complex_fm_angle(-n * xsquare() - m * ysquare());
-        vec2 p4 =     unit_complex_fm_angle( m * xsquare() - n * ysquare());
-        vec2 p5 = g * unit_complex_fm_angle( m * xsquare() + n * ysquare());
-        vec2 p6 = g * unit_complex_fm_angle(-n * xsquare() + m * ysquare());
-        vec2 p7 = g * unit_complex_fm_angle(-m * xsquare() - n * ysquare());
-        vec2 p8 = g * unit_complex_fm_angle( n * xsquare() - m * ysquare());
+        vec2 p1 =        unit_complex_fm_angle( n * xsquare() + m * ysquare());
+        vec2 p2 =        unit_complex_fm_angle(-m * xsquare() + n * ysquare());
+        vec2 p3 =        unit_complex_fm_angle(-n * xsquare() - m * ysquare());
+        vec2 p4 =        unit_complex_fm_angle( m * xsquare() - n * ysquare());
+        vec2 p5 = sign * unit_complex_fm_angle( m * xsquare() + n * ysquare());
+        vec2 p6 = sign * unit_complex_fm_angle(-n * xsquare() + m * ysquare());
+        vec2 p7 = sign * unit_complex_fm_angle(-m * xsquare() - n * ysquare());
+        vec2 p8 = sign * unit_complex_fm_angle( n * xsquare() - m * ysquare());
         vec2 thisterm = (p1 + p2 + p3 + p4 + p5 + p6 + p7 + p8) / 4.0;
 
         thisterm = complex_multiplication(thisterm, polar_to_complex(float(r_vals[k]), float(a_vals[k])));
