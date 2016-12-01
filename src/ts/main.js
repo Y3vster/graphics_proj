@@ -34,7 +34,7 @@ System.register("primitives", [], function(exports_1, context_1) {
 System.register("my_components", [], function(exports_2, context_2) {
     "use strict";
     var __moduleName = context_2 && context_2.id;
-    var TermSet, WaveElement, GUIControllerX, VectorPicker, CoeffPicker;
+    var TermSet, WallpTerm, GUIControllerX, VectorPicker, CoeffPicker;
     function applyMixins(derivedCtor, baseCtors) {
         baseCtors.forEach(function (baseCtor) {
             Object.getOwnPropertyNames(baseCtor.prototype).forEach(function (name) {
@@ -66,30 +66,31 @@ System.register("my_components", [], function(exports_2, context_2) {
              */
             // Add functionality to the gui controller
             // Makes it hideable and highlightable
-            WaveElement = (function () {
-                function WaveElement() {
-                    this.pickerVect = new VectorPicker(this.polarCallback);
-                    this.pickerMN = new CoeffPicker(this.mnCallback);
+            WallpTerm = (function () {
+                function WallpTerm(polarCallback, mnCallback) {
+                    this.pickerVect = new VectorPicker(polarCallback);
+                    this.pickerMN = new CoeffPicker(mnCallback);
                     this.domElement = document.createElement('li');
                     this.domElement.className = 'term-controller';
                     this.domElement.appendChild(this.pickerVect.domElement);
                     this.domElement.appendChild(this.pickerMN.domElement);
                 }
-                WaveElement.prototype.polarCallback = function (plr) {
-                    console.log('polar updated!');
-                    // uniforms.r_vals.value[0] = plr.r;
-                    // uniforms.a_vals.value[0] = plr.a;
-                    // canvas_update();
+                WallpTerm.prototype.SetValue = function (r, a, m, n) {
+                    this.pickerVect.SetValue(r, a);
+                    this.pickerMN.SetValue(m, n);
                 };
-                WaveElement.prototype.mnCallback = function (m, n) {
-                    console.log('mn updated!');
-                    // uniforms.m_vals.value[0] = m;
-                    // uniforms.n_vals.value[0] = n;
-                    // canvas_update();
+                WallpTerm.prototype.hide = function () {
+                    this.domElement.style.display = 'none';
                 };
-                return WaveElement;
+                WallpTerm.prototype.show = function () {
+                    this.domElement.style.display = 'list-item';
+                };
+                WallpTerm.prototype.add_to_folder = function (fldr) {
+                    fldr.__ul.appendChild(this.domElement);
+                };
+                return WallpTerm;
             }());
-            exports_2("WaveElement", WaveElement);
+            exports_2("WallpTerm", WallpTerm);
             GUIControllerX = (function (_super) {
                 __extends(GUIControllerX, _super);
                 function GUIControllerX() {
@@ -168,7 +169,7 @@ System.register("my_components", [], function(exports_2, context_2) {
                 };
                 // Sets the draggable knob to some polar coordinate
                 // params: radius and angle
-                VectorPicker.prototype.setKnobPosnPolar = function (r, a) {
+                VectorPicker.prototype.SetValue = function (r, a) {
                     var rect = this.domBack.getBoundingClientRect();
                     var x = 0.5 * r * Math.cos(a) + 0.5;
                     x = x * rect.width;
@@ -269,13 +270,12 @@ System.register("my_components", [], function(exports_2, context_2) {
                 };
                 // Sets the draggable knob to some polar coordinate
                 // params: radius and angle
-                CoeffPicker.prototype.setKnobPosnPolar = function (r, a) {
+                CoeffPicker.prototype.SetValue = function (m, n) {
                     var rect = this.domBack.getBoundingClientRect();
-                    var x = 0.5 * r * Math.cos(a) + 0.5;
-                    x = x * rect.width;
-                    var y = 0.5 * r * Math.sin(a) + 0.5;
-                    y = 1.0 - y;
-                    y = y * rect.height;
+                    var stride_x = rect.width / 8.0;
+                    var stride_y = rect.height / 8.0;
+                    var x = stride_x * m;
+                    var y = stride_y * n;
                     var xy = CoeffPicker.getBoundedCoord(x, y, rect);
                     this.setKnobPosn(xy.x, xy.y);
                 };
@@ -335,7 +335,7 @@ System.register("main", ["my_components"], function(exports_3, context_3) {
     "use strict";
     var __moduleName = context_3 && context_3.id;
     var my_components_1;
-    var sidebar_open, sidebar_element, SIDEBAR_WIDTH, DEFAULT_NUM_TERMS, container, camera, scene, renderer, material, geometry, uniforms, screenshooter;
+    var sidebar_open, sidebar_element, SIDEBAR_WIDTH, DEFAULT_NUM_TERMS, DEFAULT_NUM_COLORS, DEFAULT_SATURATION, DEFAULT_MAG_STRENGTH, DEFAULT_LINE_POWER, container, camera, scene, renderer, material, geometry, uniforms, screenshooter;
     // Loads the shader files
     function load_shader(name) {
         $.ajax({
@@ -355,7 +355,11 @@ System.register("main", ["my_components"], function(exports_3, context_3) {
             m_vals: { value: [2, 2, 1, 0, 0, 0, 0, 0, 0, 0] },
             r_vals: { value: [0.5, 0.9, 1.0, 0.2, 0.4, 0.0, 0.0, 0.0, 0.0, 0.0] },
             a_vals: { value: [2.5, 1.0, 0.0, -1.0, -2.5, 0.0, 0, 0, 0.0, 0.0, 0.0] },
-            num_terms: { value: DEFAULT_NUM_TERMS }
+            num_terms: { value: DEFAULT_NUM_TERMS },
+            num_colors: { value: DEFAULT_NUM_COLORS },
+            saturation: { value: DEFAULT_SATURATION },
+            magnitude_strength: { value: DEFAULT_MAG_STRENGTH },
+            line_power: { value: DEFAULT_LINE_POWER }
         };
         // RENDERER THAT PRESERVES THE DRAWING BUFFER
         renderer = new THREE.WebGLRenderer({ preserveDrawingBuffer: true });
@@ -413,11 +417,14 @@ System.register("main", ["my_components"], function(exports_3, context_3) {
             }],
         execute: function() {
             // import {polar} from "./primitives";
-            console.log('hi2');
             /* GLOBAL DECLARATIONS */
             sidebar_open = false;
             SIDEBAR_WIDTH = 245;
             DEFAULT_NUM_TERMS = 3;
+            DEFAULT_NUM_COLORS = 64;
+            DEFAULT_SATURATION = 0.8;
+            DEFAULT_MAG_STRENGTH = 0.5;
+            DEFAULT_LINE_POWER = 25.0;
             // hides the sidebar
             (function () {
                 sidebar_element = document.getElementById('sidebar');
@@ -442,27 +449,8 @@ System.register("main", ["my_components"], function(exports_3, context_3) {
             $(function () {
                 var glsl_entries = JSON.parse($("#shader-filelist").html()).shader_files;
                 var uniforms_default = JSON.parse($("#uniforms-default").html());
-                init(glsl_entries[2].file);
+                init(glsl_entries[1].file);
                 // TODO: VECTOR PICKER TEST
-                // var coeffs = new WaveElement(polarCallback, mnCallback);
-                // $('#test-pickers').append(coeffs.domElement);
-                // var vectPick = new VectorPicker((plr: polar) => {
-                //     // console.log(plr);
-                //     uniforms.r_vals.value[0] = plr.r;
-                //     uniforms.a_vals.value[0] = plr.a;
-                //     canvas_update();
-                // });
-                // var mnPick = new CoeffPicker((m: number, n: number) => {
-                //     // console.log(plr);
-                //     uniforms.m_vals.value[0] = m;
-                //     uniforms.n_vals.value[0] = n;
-                //     canvas_update();
-                // });
-                //
-                // $('#test-pickers').append(mnPick.domElement);
-                // $('#test-pickers').append(vectPick.domElement);
-                // vectPick.setKnobPosnPolar(0.5, 0.5);
-                // mnPick.setKnobPosnPolar(-0.5, 0.5);
                 var gui = new dat.GUI({
                     autoPlace: false,
                     load: uniforms_default
@@ -481,6 +469,31 @@ System.register("main", ["my_components"], function(exports_3, context_3) {
                     }
                     return GLSLEntry;
                 }());
+                var dispSettings = gui.addFolder('Display Settings');
+                dispSettings.add(uniforms.num_colors, 'value')
+                    .min(1)
+                    .max(128)
+                    .step(1)
+                    .name("# Colors")
+                    .onChange(canvas_update);
+                dispSettings.add(uniforms.saturation, 'value')
+                    .min(0.0)
+                    .max(1.0)
+                    .step(0.1)
+                    .name("Saturation")
+                    .onChange(canvas_update);
+                dispSettings.add(uniforms.magnitude_strength, 'value')
+                    .min(0.0)
+                    .max(1.0)
+                    .step(0.1)
+                    .name("Magnitude Strength")
+                    .onChange(canvas_update);
+                dispSettings.add(uniforms.line_power, 'value')
+                    .min(0.0)
+                    .max(30.0)
+                    .step(1)
+                    .name("Line Power")
+                    .onChange(canvas_update);
                 var shadersFolder = gui.addFolder("Groups");
                 var shader_buttons;
                 var active_shader_btn;
@@ -507,35 +520,37 @@ System.register("main", ["my_components"], function(exports_3, context_3) {
                     .step(1)
                     .name("# Terms");
                 var fldr = gui.addFolder("Terms");
-                // TODO: REMOVE TEST CONTROLLER
-                var waveElem = new my_components_1.WaveElement();
-                fldr.__ul.appendChild(waveElem.domElement);
                 var terms = [];
                 var max_terms = 10;
+                var _loop_1 = function() {
+                    var idx = i;
+                    elem = new my_components_1.WallpTerm(function (plr) {
+                        uniforms.r_vals.value[idx] = plr.r;
+                        uniforms.a_vals.value[idx] = plr.a;
+                        canvas_update();
+                    }, function (m, n) {
+                        uniforms.m_vals.value[idx] = m;
+                        uniforms.n_vals.value[idx] = n;
+                        canvas_update();
+                    });
+                    elem.add_to_folder(fldr);
+                    terms.push(elem);
+                };
+                var elem;
                 for (var i = 0; i < max_terms; i++) {
-                    var n = i + 1;
-                    var term_set = new my_components_1.TermSet(fldr);
-                    term_set.m = fldr.add(uniforms.m_vals.value, i.toString()).min(0).max(10).step(1).name('M' + n);
-                    term_set.n = fldr.add(uniforms.n_vals.value, i.toString()).min(0).max(10).step(1).name('N' + n);
-                    term_set.r = fldr.add(uniforms.r_vals.value, i.toString()).min(0).max(1.0).step(0.05).name('R' + n);
-                    term_set.a = fldr.add(uniforms.a_vals.value, i.toString()).min(0).max(2.0 * Math.PI).step(0.05).name('A' + n);
-                    term_set.m.onChange(canvas_update);
-                    term_set.n.onChange(canvas_update);
-                    term_set.r.onChange(canvas_update);
-                    term_set.a.onChange(canvas_update);
-                    terms.push(term_set);
+                    _loop_1();
                 }
                 fldr.open();
                 var num_terms = 10;
                 var num_terms_change_fn = function (value) {
                     if (num_terms < value) {
                         for (var i = num_terms - 1; i < value; i++) {
-                            terms[i].showMe();
+                            terms[i].show();
                         }
                     }
                     else if (num_terms > value) {
                         for (var i = num_terms - 1; i > (value - 1); i--) {
-                            terms[i].hideMe();
+                            terms[i].hide();
                         }
                     }
                     num_terms = value;
@@ -543,12 +558,13 @@ System.register("main", ["my_components"], function(exports_3, context_3) {
                 };
                 num_terms_controller.onChange(num_terms_change_fn);
                 num_terms_change_fn(DEFAULT_NUM_TERMS);
-                // COLOR
-                // var clrTest = {val: '#012345'};
-                // var colorControlelr = gui.addColor(clrTest, 'val');
                 // global dat.gui event listening
                 $(gui.domElement).on('mousedown mouseup keydown keyup hover', canvas_update);
                 $('#dat-gui').append(gui.domElement);
+                // can update the knobs on the components after adding them to the dom
+                for (var i = 0; i < max_terms; i++) {
+                    terms[i].SetValue(uniforms.r_vals.value[i], uniforms.a_vals.value[i], uniforms.m_vals.value[i], uniforms.n_vals.value[i]);
+                }
                 canvas_update();
             });
         }
@@ -569,53 +585,4 @@ System.register("main", ["my_components"], function(exports_3, context_3) {
 //
 // gl.linkProgram(program);
 // gl.useProgram(program);
-/**
- * Created by YK on 12/1/16.
- */
-/// <reference path="./dat.gui.d.ts" />
-System.register("dat_extension", [], function(exports_4, context_4) {
-    "use strict";
-    var __moduleName = context_4 && context_4.id;
-    function addGUIWaveController(waveElem) {
-        waveElem.domElement.className = 'c';
-    }
-    return {
-        setters:[],
-        execute: function() {
-        }
-    }
-});
-//
-// class CustomDatGUI extends dat.GUI {
-//     addTermController(waveElem : WaveElement) {
-//
-//         // recallSavedValue(gui, controller);
-//
-//         // dom.addClass(controller.domElement, 'c');
-//         //
-//         // const name = document.createElement('span');
-//         // dom.addClass(name, 'property-name');
-//         // name.innerHTML = controller.property;
-//         //
-//         // const container = document.createElement('div');
-//         // container.appendChild(name);
-//         // container.appendChild(controller.domElement);
-//         //
-//         // const li = addRow(gui, container, params.before);
-//         //
-//         // dom.addClass(li, GUI.CLASS_CONTROLLER_ROW);
-//         // if (controller instanceof ColorController) {
-//         //     dom.addClass(li, 'color');
-//         // } else {
-//         //     dom.addClass(li, typeof controller.getValue());
-//         // }
-//         //
-//         // augmentController(gui, li, controller);
-//         //
-//         // gui.__controllers.push(controller);
-//         //
-//         // return controller;
-//     }
-//
-// }
 //# sourceMappingURL=main.js.map

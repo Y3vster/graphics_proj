@@ -19,6 +19,10 @@ var sidebar_open = false;
 var sidebar_element: HTMLElement;
 var SIDEBAR_WIDTH = 245;
 var DEFAULT_NUM_TERMS = 3;
+var DEFAULT_NUM_COLORS = 64;
+var DEFAULT_SATURATION = 0.8;
+var DEFAULT_MAG_STRENGTH = 0.5;
+var DEFAULT_LINE_POWER = 25.0;
 
 var container;
 var camera, scene, renderer;
@@ -71,7 +75,7 @@ $(function () {
     var uniforms_default = JSON.parse($("#uniforms-default").html());
 
 
-    init(glsl_entries[2].file);
+    init(glsl_entries[1].file);
 
     // TODO: VECTOR PICKER TEST
 
@@ -93,6 +97,35 @@ $(function () {
         name: string;
         file: string;
     }
+
+    var dispSettings = gui.addFolder('Display Settings');
+    dispSettings.add(uniforms.num_colors, 'value')
+        .min(1)
+        .max(128)
+        .step(1)
+        .name("# Colors")
+        .onChange(canvas_update);
+
+    dispSettings.add(uniforms.saturation, 'value')
+        .min(0.0)
+        .max(1.0)
+        .step(0.1)
+        .name("Saturation")
+        .onChange(canvas_update);
+
+    dispSettings.add(uniforms.magnitude_strength, 'value')
+        .min(0.0)
+        .max(1.0)
+        .step(0.1)
+        .name("Magnitude Strength")
+        .onChange(canvas_update);
+
+    dispSettings.add(uniforms.line_power, 'value')
+        .min(0.0)
+        .max(30.0)
+        .step(1)
+        .name("Line Power")
+        .onChange(canvas_update);
 
     let shadersFolder = gui.addFolder("Groups");
     var shader_buttons: Array<GUIControllerX>;
@@ -161,6 +194,7 @@ $(function () {
     num_terms_controller.onChange(num_terms_change_fn);
     num_terms_change_fn(DEFAULT_NUM_TERMS);
 
+
     // global dat.gui event listening
     $(gui.domElement).on('mousedown mouseup keydown keyup hover', canvas_update);
 
@@ -189,7 +223,11 @@ function init(shader_file: string) {
         m_vals: {value: [2, 2, 1, 0, 0, 0, 0, 0, 0, 0]},
         r_vals: {value: [0.5, 0.9, 1.0, 0.2, 0.4, 0.0, 0.0, 0.0, 0.0, 0.0]},
         a_vals: {value: [2.5, 1.0, 0.0, -1.0, -2.5, 0.0, 0, 0, 0.0, 0.0, 0.0]},
-        num_terms: {value: DEFAULT_NUM_TERMS}
+        num_terms: {value: DEFAULT_NUM_TERMS},
+        num_colors: {value: DEFAULT_NUM_COLORS},
+        saturation: {value: DEFAULT_SATURATION},
+        magnitude_strength: {value: DEFAULT_MAG_STRENGTH},
+        line_power: {value: DEFAULT_LINE_POWER}
     };
 
     // RENDERER THAT PRESERVES THE DRAWING BUFFER

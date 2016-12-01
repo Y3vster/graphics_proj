@@ -1,18 +1,11 @@
-#define M_PI 3.1415926535897932384626433832795
-#define M_SQRT3 1.732050807568877
-
-#define GRID_SPACING vec2(1.0)
-#define DC_SATUR 0.7
-#define DC_GRID_STR 0.1
-#define DC_MAG_STR 0.2
-#define DC_LINE_PWR 5.0
-#define DC_NUM_COLOR_ADJ (2.0 * M_PI / 10.0)
+#extension GL_OES_standard_derivatives : enable
 
 #ifdef GL_ES
 precision mediump float;
 #endif
 
-#extension GL_OES_standard_derivatives : enable
+#define M_PI 3.1415926535897932384626433832795
+#define M_SQRT3 1.732050807568877
 
 uniform float time;
 uniform vec2 mouse;
@@ -22,6 +15,10 @@ uniform int n_vals[10];
 uniform float r_vals[10];
 uniform float a_vals[10];
 uniform int num_terms;
+uniform int num_colors;
+uniform float saturation;
+uniform float magnitude_strength;
+uniform float line_power;
 
 vec2 posn;
 
@@ -41,30 +38,22 @@ float hypot (vec2 z) {
   return (z.x == 0.0 && z.y == 0.0) ? 0.0 : x * sqrt(1.0 + t * t);
 }
 
-vec4 domainColoring (vec2 z, vec2 gridSpacing, float saturation, float gridStrength, float magStrength, float linePower) {
+vec4 domainColoring (vec2 z) {
   float carg = atan(z.y, z.x);
   float cmod = hypot(z);
 
-  float rebrt = (fract(z.x / gridSpacing.x) - 0.5) * 2.0;
-  rebrt *= rebrt;
-
-  float imbrt = (fract(z.y / gridSpacing.y) - 0.5) * 2.0;
-  imbrt *= imbrt;
-
-  float grid = 1.0 - (1.0 - rebrt) * (1.0 - imbrt);
-  grid = pow(abs(grid), linePower);
-
   float circ = (fract(log2(cmod)) - 0.5) * 2.0;
-  circ = pow(abs(circ), linePower);
+  circ = pow(abs(circ), line_power);
 
-  circ *= magStrength;
+  circ *= magnitude_strength;
 
-  vec3 rgb = hsv2rgb(vec3(carg * 0.5 / M_PI, saturation, 0.5 + 0.5 * saturation - gridStrength * grid));
+  float color_adj = 2.0 * M_PI / float(num_colors);
+  carg = mod(floor(carg / color_adj) * color_adj, 2.0 * M_PI);
+  vec3 rgb = hsv2rgb(vec3(carg, saturation, 0.5 + 0.5 * saturation));
   rgb *= (1.0 - circ);
   rgb += circ * vec3(1.0);
   return vec4(rgb, 1.0);
 }
-
 
 float xsquare(){
     return 2.0 * M_PI * posn.x;
@@ -121,7 +110,5 @@ void main () {
     /* complex */
     vec2 z = p4m_fn();
 
-    gl_FragColor = domainColoring(z, GRID_SPACING, DC_SATUR, DC_GRID_STR, DC_MAG_STR, DC_LINE_PWR);
+    gl_FragColor = domainColoring(z);
 }
-
-
