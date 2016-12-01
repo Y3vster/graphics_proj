@@ -451,7 +451,7 @@ System.register("main", ["my_components"], function(exports_3, context_3) {
             $(function () {
                 var glsl_entries = JSON.parse($("#shader-filelist").html()).shader_files;
                 var uniforms_default = JSON.parse($("#uniforms-default").html());
-                init(glsl_entries[1].file);
+                init(glsl_entries[2].file);
                 // TODO: VECTOR PICKER TEST
                 var gui = new dat.GUI({
                     autoPlace: false,
