@@ -34,34 +34,34 @@ export class TermSet {
 // Add functionality to the gui controller
 // Makes it hideable and highlightable
 
-export class WaveElement  {
+export class WallpTerm  {
     domElement : HTMLElement;
     pickerVect: VectorPicker;
     pickerMN: CoeffPicker;
 
-    constructor() {
-        this.pickerVect = new VectorPicker(this.polarCallback);
-        this.pickerMN = new CoeffPicker(this.mnCallback);
+    constructor(polarCallback, mnCallback) {
+        this.pickerVect = new VectorPicker(polarCallback);
+        this.pickerMN = new CoeffPicker(mnCallback);
         this.domElement = document.createElement('li');
         this.domElement.className = 'term-controller';
         this.domElement.appendChild(this.pickerVect.domElement);
         this.domElement.appendChild(this.pickerMN.domElement);
     }
 
-    polarCallback(plr: polar) {
-        console.log('polar updated!');
-        // uniforms.r_vals.value[0] = plr.r;
-        // uniforms.a_vals.value[0] = plr.a;
-        // canvas_update();
+    SetValue(r, a, m, n){
+        this.pickerVect.SetValue(r, a);
+        this.pickerMN.SetValue(m, n);
     }
 
-    mnCallback(m: number, n: number) {
-        console.log('mn updated!');
-        // uniforms.m_vals.value[0] = m;
-        // uniforms.n_vals.value[0] = n;
-        // canvas_update();
+    hide(){
+        this.domElement.style.display = 'none';
     }
-
+    show(){
+        this.domElement.style.display = 'list-item';
+    }
+    add_to_folder(fldr){
+        (<any>fldr).__ul.appendChild(this.domElement);
+    }
 }
 
 
@@ -164,7 +164,7 @@ export class VectorPicker {
 
     // Sets the draggable knob to some polar coordinate
     // params: radius and angle
-    setKnobPosnPolar(r, a) {
+    SetValue(r, a) {
         var rect = this.domBack.getBoundingClientRect();
         var x = 0.5 * r * Math.cos(a) + 0.5;
         x = x * rect.width;
@@ -285,13 +285,12 @@ export class CoeffPicker {
 
     // Sets the draggable knob to some polar coordinate
     // params: radius and angle
-    setKnobPosnPolar(r, a) {
+    SetValue(m, n) {
         var rect = this.domBack.getBoundingClientRect();
-        var x = 0.5 * r * Math.cos(a) + 0.5;
-        x = x * rect.width;
-        var y = 0.5 * r * Math.sin(a) + 0.5;
-        y = 1.0 - y;
-        y = y * rect.height;
+        var stride_x = rect.width / 8.0;
+        var stride_y = rect.height / 8.0;
+        var x = stride_x * m;
+        var y = stride_y * n;
         var xy = CoeffPicker.getBoundedCoord(x, y, rect);
         this.setKnobPosn(xy.x, xy.y);
     }

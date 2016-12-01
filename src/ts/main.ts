@@ -10,10 +10,9 @@
 // import components = require("./my_components");
 // import primitives = require("./primitives");
 import {polar} from "./primitives";
-import {TermSet, WaveElement, VectorPicker, CoeffPicker, GUIControllerX} from "./my_components";
+import {TermSet, WallpTerm, VectorPicker, CoeffPicker, GUIControllerX} from "./my_components";
 // import {polar} from "./primitives";
 
-console.log('hi2');
 
 /* GLOBAL DECLARATIONS */
 var sidebar_open = false;
@@ -58,7 +57,6 @@ function load_shader(name: string) {
 // Component to modify a vector
 
 
-
 var screenshooter = {
     shoot: function () {
         var wind = window.open();
@@ -76,28 +74,6 @@ $(function () {
     init(glsl_entries[2].file);
 
     // TODO: VECTOR PICKER TEST
-
-    // var coeffs = new WaveElement(polarCallback, mnCallback);
-    // $('#test-pickers').append(coeffs.domElement);
-
-
-    // var vectPick = new VectorPicker((plr: polar) => {
-    //     // console.log(plr);
-    //     uniforms.r_vals.value[0] = plr.r;
-    //     uniforms.a_vals.value[0] = plr.a;
-    //     canvas_update();
-    // });
-    // var mnPick = new CoeffPicker((m: number, n: number) => {
-    //     // console.log(plr);
-    //     uniforms.m_vals.value[0] = m;
-    //     uniforms.n_vals.value[0] = n;
-    //     canvas_update();
-    // });
-    //
-    // $('#test-pickers').append(mnPick.domElement);
-    // $('#test-pickers').append(vectPick.domElement);
-    // vectPick.setKnobPosnPolar(0.5, 0.5);
-    // mnPick.setKnobPosnPolar(-0.5, 0.5);
 
 
     var gui = new dat.GUI({
@@ -146,32 +122,25 @@ $(function () {
         .name("# Terms");
 
 
-
-
-
     let fldr = gui.addFolder("Terms");
-
-    // TODO: REMOVE TEST CONTROLLER
-    var waveElem = new WaveElement();
-    (<any>fldr).__ul.appendChild(waveElem.domElement);
-
-
-
-
-    let terms: Array<TermSet> = [];
+    let terms: Array<WallpTerm> = [];
     let max_terms = 10;
     for (var i = 0; i < max_terms; i++) {
-        let n = i + 1;
-        let term_set = new TermSet(fldr);
-        term_set.m = <GUIControllerX>fldr.add(uniforms.m_vals.value, i.toString()).min(0).max(10).step(1).name('M' + n);
-        term_set.n = <GUIControllerX>fldr.add(uniforms.n_vals.value, i.toString()).min(0).max(10).step(1).name('N' + n);
-        term_set.r = <GUIControllerX>fldr.add(uniforms.r_vals.value, i.toString()).min(0).max(1.0).step(0.05).name('R' + n);
-        term_set.a = <GUIControllerX>fldr.add(uniforms.a_vals.value, i.toString()).min(0).max(2.0 * Math.PI).step(0.05).name('A' + n);
-        term_set.m.onChange(canvas_update);
-        term_set.n.onChange(canvas_update);
-        term_set.r.onChange(canvas_update);
-        term_set.a.onChange(canvas_update);
-        terms.push(term_set);
+
+        let idx = i;
+        var elem = new WallpTerm(
+            (plr: polar)=> {
+                uniforms.r_vals.value[idx] = plr.r;
+                uniforms.a_vals.value[idx] = plr.a;
+                canvas_update();
+            },
+            (m: number, n: number) => {
+                uniforms.m_vals.value[idx] = m;
+                uniforms.n_vals.value[idx] = n;
+                canvas_update();
+            });
+        elem.add_to_folder(fldr);
+        terms.push(elem);
     }
     fldr.open();
 
@@ -179,11 +148,11 @@ $(function () {
     var num_terms_change_fn = function (value) {
         if (num_terms < value) {
             for (var i = num_terms - 1; i < value; i++) {
-                terms[i].showMe();
+                terms[i].show();
             }
         } else if (num_terms > value) {
             for (var i = num_terms - 1; i > (value - 1); i--) {
-                terms[i].hideMe();
+                terms[i].hide();
             }
         }
         num_terms = value;
@@ -192,15 +161,20 @@ $(function () {
     num_terms_controller.onChange(num_terms_change_fn);
     num_terms_change_fn(DEFAULT_NUM_TERMS);
 
-    // COLOR
-    // var clrTest = {val: '#012345'};
-    // var colorControlelr = gui.addColor(clrTest, 'val');
-
-
     // global dat.gui event listening
     $(gui.domElement).on('mousedown mouseup keydown keyup hover', canvas_update);
 
     $('#dat-gui').append(gui.domElement);
+
+    // can update the knobs on the components after adding them to the dom
+    for (var i = 0; i < max_terms; i++) {
+        terms[i].SetValue(
+            uniforms.r_vals.value[i],
+            uniforms.a_vals.value[i],
+            uniforms.m_vals.value[i],
+            uniforms.n_vals.value[i]
+        );
+    }
 
     canvas_update();
 });
@@ -269,7 +243,6 @@ function onWindowResize(event) {
     uniforms.resolution.value.y = renderer.domElement.height;
     canvas_update();
 }
-
 
 function canvas_update() {
     requestAnimationFrame(render);
