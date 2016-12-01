@@ -76,7 +76,7 @@ $(function () {
     var uniforms_default = JSON.parse($("#uniforms-default").html());
 
 
-    init(glsl_entries[1].file);
+    init(glsl_entries[2].file);
 
     // TODO: VECTOR PICKER TEST
 
