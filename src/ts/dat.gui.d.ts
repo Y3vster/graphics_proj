@@ -8,6 +8,9 @@ declare namespace dat {
     export module controllers {
 
         export class Controller {
+
+            constructor(object, property);
+
             destroy(): void;
 
             // Controller
