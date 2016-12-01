@@ -1,47 +1,28 @@
-About
------
-
-- 3D simple game
-- Runs in browser?
-- Terrain
-- Using angles to fly around
 
 
 
-Architecture:
--------------
+Ability to pan and zoom.
 
-# Modules
+[done] 1. When a user clicks on the pattern, the screen is updated with the pattern.
+[done] - Modular way to load the shaders from a file
+[i/p]  - Modular way to customize the shader function
 
+2. A user can change the m & n parameters, and also the r & a, 
+by dragging sliders in the DAT.GUI window
 
+3. A user can change the number of terms, and the DAT.GUI will have a 
+separate section for each term.
 
-Research
---------
+4. A user can customize the color wheel.
+    A user can pick colorwheel options from a dropdown
+    IcosColor, etc..
+    
+5. The user can pick primary colors for the color wheel using dat.GUI 
+color picker.
 
-
-Other Thoughts
---------------
-
-My fav demo/example of the list (
-- http://lights.helloenjoy.com/
-
-
-
-Cool demo on ray tracing using WebGL
-- http://madebyevan.com/webgl-water/
-- https://github.com/evanw/webgl-water 
-
-Flying simulator example (in browser)
-- http://www.ovoid.org/js/rel/2.0/demos/pitts/
-- http://www.ovoid.org/js/
-- http://www.ovoid.org/js/samples.html
-
-Archball rotation example
-- http://nehe.gamedev.net/tutorial/arcball_rotation/19003/
+6. A user can save the settings to a cookie, to be loaded later..
 
 
-https://github.com/mrdoob/three.js/blob/dev/src/geometries/PlaneBufferGeometry.js
-https://github.com/mrdoob/three.js/blob/master/examples/webgl_geometry_terrain_fog.html
-https://github.com/mrdoob/three.js/blob/dev/src/scenes/FogExp2.js
+7. Implement loading a custom image..
 
-
+8. Implement save operation..
