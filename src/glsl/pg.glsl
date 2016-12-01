@@ -21,6 +21,7 @@ uniform int num_colors;
 uniform float saturation;
 uniform float magnitude_strength;
 uniform float line_power;
+uniform float scale;
 
 vec2 posn;
 
@@ -103,6 +104,8 @@ void main () {
 	posn = gl_FragCoord.xy / resolution.xy;
 	posn = posn * 2.0 - 1.0;
 	posn.x *= resolution.x / resolution.y;
+	posn.x *= scale;
+    posn.y *= scale;
 
     /* complex */
     vec2 z = pg_fn();

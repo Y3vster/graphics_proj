@@ -19,6 +19,7 @@ var DEFAULT_NUM_COLORS = 5;
 var DEFAULT_SATURATION = 0.7;
 var DEFAULT_MAG_STRENGTH = 0.2;
 var DEFAULT_LINE_POWER = 5.0;
+var DEFAULT_SCALE = 1.0;
 var container;
 var camera, scene, renderer;
 var material, geometry;
@@ -331,6 +332,13 @@ window.onload = function () {
         .step(0.5)
         .name("Line Power");
     line_power_controller.onChange(canvas_update);
+    var scale_controller = gui
+        .add(uniforms.scale, 'value')
+        .min(0.5)
+        .max(20.0)
+        .step(0.5)
+        .name("Scale");
+    scale_controller.onChange(canvas_update);
     // global dat.gui event listening
     $(gui.domElement).on('mousedown mouseup keydown keyup hover', canvas_update);
     $('#dat-gui').append(gui.domElement);
@@ -348,7 +356,8 @@ function init(shader_file) {
         num_colors: { value: DEFAULT_NUM_COLORS },
         saturation: { value: DEFAULT_SATURATION },
         magnitude_strength: { value: DEFAULT_MAG_STRENGTH },
-        line_power: { value: DEFAULT_LINE_POWER }
+        line_power: { value: DEFAULT_LINE_POWER },
+        scale: { value: DEFAULT_SCALE }
     };
     // RENDERER THAT PRESERVES THE DRAWING BUFFER
     renderer = new THREE.WebGLRenderer({ preserveDrawingBuffer: true });
