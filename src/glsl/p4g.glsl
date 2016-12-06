@@ -1,3 +1,10 @@
+// Yevgeni Kamenski and Kelly Corrigan
+// CPSC 5700 - Computer Graphics
+// 12/1/2016
+// Sources:
+//    https://github.com/imrimt/symmetryworks-research-bowdoin
+//    https://github.com/rreusser/glsl-domain-coloring
+
 #extension GL_OES_standard_derivatives : enable
 
 #ifdef GL_ES
@@ -84,7 +91,7 @@ vec2 p4g_fn() {
         if (k == num_terms) break;	// workaround to loops being limited to constant expressions
         float m = float(m_vals[k]);
         float n = float(n_vals[k]);
-        float sign = mod(n + m, 2.0) == 0.0 ? 1.0 : -1.0;
+        float sign = mod(n + m, 2.0) > 0.0 ? -1.0 : 1.0;
 
         vec2 p1 =        unit_complex_fm_angle( n * xsquare() + m * ysquare());
         vec2 p2 =        unit_complex_fm_angle(-m * xsquare() + n * ysquare());

@@ -1,3 +1,10 @@
+// Yevgeni Kamenski and Kelly Corrigan
+// CPSC 5700 - Computer Graphics
+// 12/1/2016
+// Sources:
+//    https://github.com/imrimt/symmetryworks-research-bowdoin
+//    https://github.com/rreusser/glsl-domain-coloring
+
 #extension GL_OES_standard_derivatives : enable
 
 #ifdef GL_ES
