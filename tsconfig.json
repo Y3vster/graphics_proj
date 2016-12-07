@@ -11,8 +11,7 @@
     "files":[
         "src/ts/primitives.ts",
         "src/ts/my_components.ts",
-        "src/ts/main.ts",
-        "src/ts/dat_extension"
+        "src/ts/main.ts"
     ]
 //    "include": [
 //        "src/**/*"

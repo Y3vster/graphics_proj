@@ -1,6 +1,9 @@
-/**
- * Created by YK on 11/9/16.
- */
+// Yevgeni Kamenski and Kelly Corrigan
+// CPSC 5700 - Computer Graphics
+// 12/1/2016
+// Sources:
+//    https://workshop.chromeexperiments.com/examples/gui/#1--Basic-Usage
+
 /// <reference path="./dat.gui.d.ts" />
 /// <reference path="./three.d.ts" />
 /// <reference path="./jquery.d.ts" />
@@ -76,7 +79,7 @@ $(function () {
     var uniforms_default = JSON.parse($("#uniforms-default").html());
 
 
-    init(glsl_entries[1].file);
+    init(glsl_entries[2].file);
 
     // TODO: VECTOR PICKER TEST
 
@@ -132,6 +135,19 @@ $(function () {
         .step(1)
         .name("Line Power")
         .onChange(canvas_update);
+
+    // Zoom using scroll wheel (not working)
+    // $("#container").on('mousewheel', function(e: any) {
+    //     if (e.originalEvent.deltaY > 0 && uniforms.scale.value < 10.0) {
+    //         uniforms.scale.value += 0.01;
+    //         canvas_update();
+    //         console.log("Scrolled down");
+    //     } else if (e.originalEvent.deltaY < 0 && uniforms.scale.value > 0.1) {
+    //         uniforms.scale.value -= 0.01;
+    //         canvas_update();
+    //         console.log("Scrolled up");
+    //     };
+    // });
 
     let shadersFolder = gui.addFolder("Groups");
     var shader_buttons: Array<GUIControllerX>;

@@ -324,13 +324,11 @@ System.register("my_components", [], function(exports_2, context_2) {
         }
     }
 });
-/**
- * Created by YK on 11/9/16.
- */
-/// <reference path="./dat.gui.d.ts" />
-/// <reference path="./three.d.ts" />
-/// <reference path="./jquery.d.ts" />
-/// <reference path="./requirejs.d.ts" />
+// Yevgeni Kamenski and Kelly Corrigan
+// CPSC 5700 - Computer Graphics
+// 12/1/2016
+// Sources:
+//    https://workshop.chromeexperiments.com/examples/gui/#1--Basic-Usage
 System.register("main", ["my_components"], function(exports_3, context_3) {
     "use strict";
     var __moduleName = context_3 && context_3.id;
@@ -451,7 +449,7 @@ System.register("main", ["my_components"], function(exports_3, context_3) {
             $(function () {
                 var glsl_entries = JSON.parse($("#shader-filelist").html()).shader_files;
                 var uniforms_default = JSON.parse($("#uniforms-default").html());
-                init(glsl_entries[1].file);
+                init(glsl_entries[2].file);
                 // TODO: VECTOR PICKER TEST
                 var gui = new dat.GUI({
                     autoPlace: false,
@@ -501,6 +499,18 @@ System.register("main", ["my_components"], function(exports_3, context_3) {
                     .step(1)
                     .name("Line Power")
                     .onChange(canvas_update);
+                // Zoom using scroll wheel (not working)
+                // $("#container").on('mousewheel', function(e: any) {
+                //     if (e.originalEvent.deltaY > 0 && uniforms.scale.value < 10.0) {
+                //         uniforms.scale.value += 0.01;
+                //         canvas_update();
+                //         console.log("Scrolled down");
+                //     } else if (e.originalEvent.deltaY < 0 && uniforms.scale.value > 0.1) {
+                //         uniforms.scale.value -= 0.01;
+                //         canvas_update();
+                //         console.log("Scrolled up");
+                //     };
+                // });
                 var shadersFolder = gui.addFolder("Groups");
                 var shader_buttons;
                 var active_shader_btn;
